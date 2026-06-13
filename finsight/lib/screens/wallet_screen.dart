@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import '../models/budget.dart';
 
 class WalletScreen extends StatelessWidget {
-  const WalletScreen({super.key});
+  final List<Budget> budgets;
+
+  const WalletScreen({super.key, required this.budgets});
 
   @override
   Widget build(BuildContext context) {
@@ -9,10 +12,13 @@ class WalletScreen extends StatelessWidget {
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text('Wallet Screen', style: TextStyle(fontSize: 18)),
-            SizedBox(height: 8),
-            Text('Feature Coming Soon', style: TextStyle(fontSize: 14)),
+          children: [
+            const Text('Wallet Screen', style: TextStyle(fontSize: 18)),
+            const SizedBox(height: 8),
+            Text(
+              '${budgets.length} budgets added',
+              style: const TextStyle(fontSize: 14),
+            ),
           ],
         ),
       ),
