@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../constants/app_colors.dart';
 import '../models/goal.dart';
+import '../widgets/goal_card.dart';
 
 class GoalScreen extends StatelessWidget {
   final List<Goal> goals;
@@ -9,16 +11,26 @@ class GoalScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Goal Screen', style: TextStyle(fontSize: 18)),
-            const SizedBox(height: 8),
-            Text(
-              '${goals.length} goals added',
-              style: const TextStyle(fontSize: 14),
+            const Text(
+              'Goals',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: AppColors.text,
+              ),
             ),
+            const SizedBox(height: 6),
+            const Text(
+              'Track your saving progress',
+              style: TextStyle(color: AppColors.muted),
+            ),
+            const SizedBox(height: 20),
+            ...goals.map((goal) => GoalCard(goal: goal)),
           ],
         ),
       ),
