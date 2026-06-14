@@ -1,0 +1,59 @@
+const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcrypt');
+const { getUserByEmail } = require('../service/userService');
+const userService = require('../service/userService');
+
+// CREATE USER
+router.post('/', async (req, res) => {
+    try {
+        const user = await userService.createUser(req.body);
+        res.status(201).json(user);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get('/:id', async (req, res) => {
+    console.log('ID received:', req.params.id);
+
+    try {
+        const user = await userService.getUserById(req.params.id);
+        console.log('User found:', user);
+
+        res.json(user);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await getUserByEmail(email);
+
+        console.log('Email searched:', email);
+        console.log('User found:', user);
+
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const passwordMatches = await bcrypt.compare(password, user.userPassword);
+
+        if (!passwordMatches) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        res.json({
+            userID: user.userID,
+            userName: user.userName,
+            userEmail: user.userEmail
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+module.exports = router;

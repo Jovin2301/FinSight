@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import './main_screen.dart';
-import '../models/user.dart';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,17 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
-    // TODO: Add your login logic here
-    final user = User(
-      userID: 1,
-      userName: 'vinjo',
-      userEmail: 'jovinwong@gmail.com',
-      userMonthlyIncome: 8000,
-      lastLogin: DateTime.now(),
-      authMethod: 'Email',
-      password: '123jovin'
-    );
+  Future<void> _login() async{
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -43,19 +33,30 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (email != user.userEmail || password != user.password) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Incorrect email or password')),
+    try {
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:3000/user/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
       );
-      return;
+
+      if (response.statusCode == 200) {
+        // login successful — you could decode the user data here if needed
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Incorrect email or password')),
+        );
+      }
+    } catch (e) {
+      print('Log error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not connect to server')),
+      );
     }
-
-
-    // Navigate to MainScreen on success
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const MainScreen()),
-    );
   }
 
   @override
