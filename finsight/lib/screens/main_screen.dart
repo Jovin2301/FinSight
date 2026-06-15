@@ -67,6 +67,13 @@ class _MainScreenState extends State<MainScreen> {
 
   void _goToTransactions() => setState(() => _currentIndex = 1);
 
+  void _addGoal(Goal goal) => setState(() => _goals.add(goal));
+
+  void _updateGoal(int index, Goal goal) =>
+      setState(() => _goals[index] = goal);
+
+  void _deleteGoal(int index) => setState(() => _goals.removeAt(index));
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
@@ -87,9 +94,14 @@ class _MainScreenState extends State<MainScreen> {
         onDeleteExpense: (index) => setState(() => _expenses.removeAt(index)),
       ),
       // Wallet
-      WalletScreen(budgets: _budgets),
+      WalletScreen(budgets: _budgets, expenses: _expenses),
       // Goals
-      GoalScreen(goals: _goals),
+      GoalScreen(
+        goals: _goals,
+        onAddGoal: _addGoal,
+        onUpdateGoal: _updateGoal,
+        onDeleteGoal: _deleteGoal,
+      ),
       // Profile
       const ProfileScreen(),
     ];
