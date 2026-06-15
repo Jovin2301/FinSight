@@ -94,7 +94,7 @@ class _MainScreenState extends State<MainScreen> {
         onDeleteExpense: (index) => setState(() => _expenses.removeAt(index)),
       ),
       // Wallet
-      WalletScreen(budgets: _budgets),
+      WalletScreen(budgets: _budgets, expenses: _expenses),
       // Goals
       GoalScreen(
         goals: _goals,
