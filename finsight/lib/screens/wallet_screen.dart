@@ -2,15 +2,22 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/budget.dart';
 import '../models/expense.dart';
+import '../widgets/budget_card.dart';
 
 class WalletScreen extends StatelessWidget {
   final List<Budget> budgets;
   final List<Expense> expenses;
+  final ValueChanged<Budget> onAddBudget;
+  final void Function(int index, Budget budget) onUpdateBudget;
+  final ValueChanged<int> onDeleteBudget;
 
   const WalletScreen({
     super.key,
     required this.budgets,
     required this.expenses,
+    required this.onAddBudget,
+    required this.onUpdateBudget,
+    required this.onDeleteBudget,
   });
 
   double getSpent(String category) {
@@ -23,11 +30,89 @@ class WalletScreen extends StatelessWidget {
     return total;
   }
 
+  Future<void> _openForm(BuildContext context, [int? index]) async {
+    final budgetToEdit = index == null ? null : budgets[index];
+    final categoryController = TextEditingController(
+      text: budgetToEdit?.category ?? '',
+    );
+    final limitController = TextEditingController(
+      text: budgetToEdit?.limit.toStringAsFixed(2) ?? '',
+    );
+
+    final budget = await showDialog<Budget>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Row(
+          children: [
+            Expanded(child: Text(index == null ? 'New Budget' : 'Edit Budget')),
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.close),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: categoryController,
+              decoration: const InputDecoration(hintText: 'Category'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: limitController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: const InputDecoration(hintText: 'Budget limit'),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              final category = categoryController.text.trim();
+              final limit = double.tryParse(limitController.text.trim());
+
+              if (category.isEmpty || limit == null || limit <= 0) return;
+
+              Navigator.pop(
+                context,
+                Budget(
+                  id:
+                      budgetToEdit?.id ??
+                      DateTime.now().millisecondsSinceEpoch.toString(),
+                  category: category,
+                  limit: limit,
+                ),
+              );
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    categoryController.dispose();
+    limitController.dispose();
+
+    if (budget == null) return;
+    if (index == null) {
+      onAddBudget(budget);
+    } else {
+      onUpdateBudget(index, budget);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Wallet')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _openForm(context),
+        child: const Icon(Icons.add),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -59,71 +144,14 @@ class WalletScreen extends StatelessWidget {
                       itemBuilder: (_, index) {
                         final budget = budgets[index];
                         final spent = getSpent(budget.category);
-                        return _BudgetCard(budget: budget, spent: spent);
+                        return BudgetCard(
+                          budget: budget,
+                          spent: spent,
+                          onTap: () => _openForm(context, index),
+                          onDelete: () => onDeleteBudget(index),
+                        );
                       },
                     ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BudgetCard extends StatelessWidget {
-  final Budget budget;
-  final double spent;
-
-  const _BudgetCard({required this.budget, required this.spent});
-
-  @override
-  Widget build(BuildContext context) {
-    final left = budget.limit - spent;
-    final progress = budget.limit == 0
-        ? 0.0
-        : (spent / budget.limit).clamp(0.0, 1.0);
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  budget.category,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.text,
-                  ),
-                ),
-                Text(
-                  '\$${budget.limit.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.main,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              '\$${spent.toStringAsFixed(2)} spent, \$${left.toStringAsFixed(2)} left',
-              style: const TextStyle(color: AppColors.muted),
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 10,
-                backgroundColor: AppColors.light,
-                color: left < 0 ? AppColors.red : AppColors.main,
-              ),
             ),
           ],
         ),

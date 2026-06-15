@@ -32,7 +32,15 @@ class GoalScreen extends StatelessWidget {
     final goal = await showDialog<Goal>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(index == null ? 'New Goal' : 'Edit Goal'),
+        title: Row(
+          children: [
+            Expanded(child: Text(index == null ? 'New Goal' : 'Edit Goal')),
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.close),
+            ),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -59,10 +67,6 @@ class GoalScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
           ElevatedButton(
             onPressed: () {
               final title = titleController.text.trim();
