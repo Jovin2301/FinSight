@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../constants/app_colors.dart';
-import './profile_screen.dart';
 
 class EditUsernameScreen extends StatefulWidget {
   final User? user;
@@ -134,13 +133,12 @@ class _EditUsernameScreenState extends State<EditUsernameScreen> {
                     'Save',
                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   ),
-
-                )
-              )
+                ),
+              ),
             ],
           ),
         ),
-      )
+      ),
     );
   }
 }

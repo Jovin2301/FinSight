@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../models/budget.dart';
 import '../models/expense.dart';
+import '../models/goal.dart';
 import '../constants/app_colors.dart';
 import './transactions_screen.dart';
 import './profile_screen.dart';
@@ -17,6 +19,27 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   double _budget = 500.00;
+
+  final List<Budget> _budgets = [
+    const Budget(id: '1', category: 'Food', limit: 200),
+    const Budget(id: '2', category: 'Transport', limit: 120),
+    const Budget(id: '3', category: 'Shopping', limit: 180),
+  ];
+
+  final List<Goal> _goals = [
+    const Goal(
+      id: '1',
+      title: 'Emergency Fund',
+      targetAmount: 1000,
+      savedAmount: 250,
+    ),
+    const Goal(
+      id: '2',
+      title: 'New Laptop',
+      targetAmount: 2000,
+      savedAmount: 600,
+    ),
+  ];
 
   final List<Expense> _expenses = [
     Expense(
@@ -44,6 +67,20 @@ class _MainScreenState extends State<MainScreen> {
 
   void _goToTransactions() => setState(() => _currentIndex = 1);
 
+  void _addGoal(Goal goal) => setState(() => _goals.add(goal));
+
+  void _updateGoal(int index, Goal goal) =>
+      setState(() => _goals[index] = goal);
+
+  void _deleteGoal(int index) => setState(() => _goals.removeAt(index));
+
+  void _addBudget(Budget budget) => setState(() => _budgets.add(budget));
+
+  void _updateBudget(int index, Budget budget) =>
+      setState(() => _budgets[index] = budget);
+
+  void _deleteBudget(int index) => setState(() => _budgets.removeAt(index));
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
@@ -61,23 +98,30 @@ class _MainScreenState extends State<MainScreen> {
         onAddExpense: (expense) => setState(() => _expenses.add(expense)),
         onUpdateExpense: (index, expense) =>
             setState(() => _expenses[index] = expense),
-        onDeleteExpense: (index) =>
-            setState(() => _expenses.removeAt(index)),
+        onDeleteExpense: (index) => setState(() => _expenses.removeAt(index)),
       ),
       // Wallet
-      const WalletScreen(),
+      WalletScreen(
+        budgets: _budgets,
+        expenses: _expenses,
+        onAddBudget: _addBudget,
+        onUpdateBudget: _updateBudget,
+        onDeleteBudget: _deleteBudget,
+      ),
       // Goals
-      const GoalScreen(),
+      GoalScreen(
+        goals: _goals,
+        onAddGoal: _addGoal,
+        onUpdateGoal: _updateGoal,
+        onDeleteGoal: _deleteGoal,
+      ),
       // Profile
       const ProfileScreen(),
     ];
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: screens,
-      ),
+      body: IndexedStack(index: _currentIndex, children: screens),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
