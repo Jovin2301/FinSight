@@ -1,8 +1,6 @@
 const db = require('../database');
 
 async function createUser(user) {
-    const db = require('../database');
-
     const hashedPassword = await bcrypt.hash(user.userPassword, 12);
 
     const result = await db.query(
@@ -24,8 +22,6 @@ async function createUser(user) {
 // GET USER
 
 async function getUserById(id) {
-    const db = require('../database');
-    
     const result = await db.query(
         `SELECT * FROM public."User"
         WHERE "userID" = $1`,
@@ -35,6 +31,7 @@ async function getUserById(id) {
     return result.rows[0];
 }
 
+// get user by email for login purpose
 async function getUserByEmail(email) {
     const result = await db.query(
         `SELECT * FROM public."User" WHERE "userEmail" = $1`,
