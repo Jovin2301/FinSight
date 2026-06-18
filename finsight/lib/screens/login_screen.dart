@@ -1,3 +1,5 @@
+import 'package:finsight/screens/main_navigation_screen.dart';
+import 'package:finsight/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import './main_screen.dart';
 import 'dart:convert';
@@ -52,7 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      print('Log error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not connect to server')),
       );
@@ -250,11 +251,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Feature not available yet'),
-                              duration: Duration(seconds: 2),
-                            ),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const RegisterScreen()),
                           );
                         },
                         child: const Text(

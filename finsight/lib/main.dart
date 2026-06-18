@@ -74,7 +74,7 @@ class FinSightApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const MainScreen(),
+      home: const LoginScreen(),
     );
   }
 }

@@ -28,19 +28,17 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// User login logic - 'localhost/user/login'
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await getUserByEmail(email);
 
-        console.log('Email searched:', email);
-        console.log('User found:', user);
-
         if (!user) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
-        const passwordMatches = await bcrypt.compare(password, user.userPassword);
+        const passwordMatches = await bcrypt.compare(password, user.userPassword); 
 
         if (!passwordMatches) {
             return res.status(401).json({ error: 'Invalid email or password' });
