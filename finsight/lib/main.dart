@@ -1,4 +1,4 @@
-import 'package:finsight/screens/main_screen.dart';
+import 'package:finsight/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'constants/app_colors.dart';
 
