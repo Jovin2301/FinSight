@@ -33,6 +33,28 @@ class TransactionsScreen extends StatelessWidget {
     index == null ? onAddExpense(expense) : onUpdateExpense(index, expense);
   }
 
+  Future<void> _confirmDelete(BuildContext context, int index) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete Transaction?'),
+        content: Text('Remove "${expenses[index].title}" from transactions?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) onDeleteExpense(index);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -103,7 +125,7 @@ class TransactionsScreen extends StatelessWidget {
                       itemBuilder: (_, index) => ExpenseCard(
                         expense: expenses[index],
                         onTap: () => _openForm(context, index),
-                        onDelete: () => onDeleteExpense(index),
+                        onDelete: () => _confirmDelete(context, index),
                       ),
                     ),
             ),
