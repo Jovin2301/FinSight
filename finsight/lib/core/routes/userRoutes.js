@@ -4,16 +4,6 @@ const bcrypt = require('bcrypt');
 const { getUserByEmail } = require('../service/userService');
 const userService = require('../service/userService');
 
-// CREATE USER
-router.post('/', async (req, res) => {
-    try {
-        const user = await userService.createUser(req.body);
-        res.status(201).json(user);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 router.get('/:id', async (req, res) => {
     console.log('ID received:', req.params.id);
 
@@ -49,6 +39,18 @@ router.post('/login', async (req, res) => {
             userName: user.userName,
             userEmail: user.userEmail
         });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// creating / registering user
+router.post('/register', async (req, res) => {
+    console.log('body', req.body);
+    try {
+        const user = await userService.registerUser(req.body);
+        res.status(201).json(user);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
