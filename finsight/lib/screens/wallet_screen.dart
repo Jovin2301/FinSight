@@ -104,6 +104,28 @@ class WalletScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _confirmDelete(BuildContext context, int index) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete Budget?'),
+        content: Text('Remove the ${budgets[index].category} budget?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) onDeleteBudget(index);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -148,7 +170,7 @@ class WalletScreen extends StatelessWidget {
                           budget: budget,
                           spent: spent,
                           onTap: () => _openForm(context, index),
-                          onDelete: () => onDeleteBudget(index),
+                          onDelete: () => _confirmDelete(context, index),
                         );
                       },
                     ),

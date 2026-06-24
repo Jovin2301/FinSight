@@ -87,6 +87,8 @@ class _MainScreenState extends State<MainScreen> {
       // Home
       HomeContent(
         expenses: _expenses,
+        budgets: _budgets,
+        goals: _goals,
         monthlyBudget: _budget,
         onAddExpense: (expense) => setState(() => _expenses.add(expense)),
         onBudgetChanged: (budget) => setState(() => _budget = budget),

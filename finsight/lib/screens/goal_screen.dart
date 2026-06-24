@@ -105,6 +105,28 @@ class GoalScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _confirmDelete(BuildContext context, int index) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Delete Goal?'),
+        content: Text('Remove "${goals[index].title}" from your goals?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete == true) onDeleteGoal(index);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,7 +168,7 @@ class GoalScreen extends StatelessWidget {
                       itemBuilder: (_, index) => GoalCard(
                         goal: goals[index],
                         onTap: () => _openForm(context, index),
-                        onDelete: () => onDeleteGoal(index),
+                        onDelete: () => _confirmDelete(context, index),
                       ),
                     ),
             ),
