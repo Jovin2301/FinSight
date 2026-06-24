@@ -1,8 +1,10 @@
 import 'package:finsight/screens/login_screen.dart';
 import 'package:currency_picker/currency_picker.dart';
 import 'package:flutter/material.dart';
-import '../models/user.dart';
 import '../widgets/profile_card.dart';
+import './auth_provider.dart';
+import 'package:provider/provider.dart';
+import './edit_username_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,24 +17,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedCurrency = 'SGD';
   String _selectedBudgetCycle = 'Monthly';
   String _selectedIncomeType = 'Salaried';
-
-  final List<User> _userDetail = [
-    User(
-      userID: 1,
-      userName: 'vinjo',
-      userEmail: 'jovinwong@gmail.com',
-      userMonthlyIncome: 8000,
-      lastLogin: DateTime.now(),
-      authMethod: 'Email',
-      password: '123jovin',
-    ),
-  ];
-
-  void _updateUserDetail(User updatedUser, int index) {
-    setState(() {
-      _userDetail[index] = updatedUser;
-    });
-  }
 
   Future<void> _openLoginScreen() async {
     Navigator.push(
@@ -93,6 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
     return 
     Scaffold(
       backgroundColor: Colors.white,
@@ -133,8 +118,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             // profile card
             ProfileCard(
-              user: _userDetail[0],
-              onUserUpdated: (updatedUser) => _updateUserDetail(updatedUser, 0),
+              user: user,
+              onUserUpdated: (user) => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditUsernameScreen())
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -242,7 +230,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               width: double.infinity,
               height: 52,
               child: OutlinedButton(
-                onPressed: () => _openLoginScreen(),
+                onPressed: () async {
+                  await context.read<AuthProvider>().logout();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+                  );
+                },
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.redAccent,
                   side: const BorderSide(color: Colors.redAccent),

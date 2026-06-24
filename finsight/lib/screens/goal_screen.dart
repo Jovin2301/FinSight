@@ -133,6 +133,7 @@ class GoalScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Goals')),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'addGoal',
         onPressed: () => _openForm(context),
         child: const Icon(Icons.add),
       ),

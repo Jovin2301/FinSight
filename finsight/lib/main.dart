@@ -1,9 +1,19 @@
 import 'package:finsight/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'constants/app_colors.dart';
+import 'package:provider/provider.dart';
+import './screens/auth_provider.dart';
+import './screens/main_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
-  runApp(const FinSightApp());
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
+      child: const FinSightApp(),
+    ),
+  );
 }
 
 class FinSightApp extends StatelessWidget {
@@ -72,7 +82,18 @@ class FinSightApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const LoginScreen(),
+      home: FutureBuilder(
+        future: context.read<AuthProvider>().tryAutoLogin(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          }
+          // automatically sends user to the right screen on launch
+          return context.watch<AuthProvider>().isLoggedIn
+              ? const MainScreen()
+              : const LoginScreen();
+        },
+      ),
     );
   }
 }

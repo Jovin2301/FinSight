@@ -132,6 +132,7 @@ class WalletScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Wallet')),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'addwallet',
         onPressed: () => _openForm(context),
         child: const Icon(Icons.add),
       ),

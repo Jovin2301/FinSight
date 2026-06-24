@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import './login_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:dotenv/dotenv.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -12,6 +14,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
+  final _uNameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
@@ -22,15 +25,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _uNameController.dispose();
     super.dispose();
   }
 
   Future<void> _register() async {
     final email = _emailController.text.trim();
+    final username = _uNameController.text.trim();
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (email.isEmpty || username.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
       );
@@ -46,9 +51,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:3000/user'),
+        Uri.parse('${dotenv.env['BASE_URL']}/user/register'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'userEmail': email, 'userPassword': password}),
+        body: jsonEncode({'email': email, 'username': username, 'password': password}),
       );
 
       if (response.statusCode == 201) {
@@ -57,6 +62,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
       } else {
+        print('Status: ${response.statusCode}');
+        print('Body: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Could not create account')),
         );
@@ -147,7 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               _buildField(
                 label: 'Username',
-                controller: _emailController,
+                controller: _uNameController,
                 hint: 'Enter your preferred username',
                 keyboardType: TextInputType.emailAddress,
                 suffixIcon: Icon(Icons.person_outlined, color: Colors.grey[400]),
