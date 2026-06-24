@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import './login_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:dotenv/dotenv.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -49,7 +51,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:3000/user/register'),
+        Uri.parse('${dotenv.env['BASE_URL']}/user/register'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'username': username, 'password': password}),
       );

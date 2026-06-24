@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import './main_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:dotenv/dotenv.dart';
+import './auth_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -37,17 +41,35 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:3000/user/login'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('${dotenv.env['BASE_URL']}/user/login'),
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: jsonEncode({'email': email, 'password': password}),
       );
 
       if (response.statusCode == 200) {
-        // login successful — you could decode the user data here if needed
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainScreen()),
-        );
+        final data = jsonDecode(response.body);
+
+        // put the user data into the box
+        try {
+          await context.read<AuthProvider>().setSession(
+            data['token'],
+            data['user'],
+          );
+          print('full response: $data');        // everything the server sent
+          print('user object: ${data['user']}');
+          print('3');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const MainScreen()),
+          );
+          print('4');
+        }
+        catch (e, stack) {
+          print('SETSESSION CRASHED: $e');
+          print(stack);
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Incorrect email or password')),

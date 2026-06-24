@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../models/user.dart';
 import '../screens/edit_username_screen.dart';
 
 class ProfileCard extends StatelessWidget {
-  final User user;
-  final Function(User) onUserUpdated;
+  final Map<String, dynamic>? user;
+  final Function(Map<String, dynamic>) onUserUpdated;
 
   const ProfileCard({
     super.key,
@@ -14,18 +13,15 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userName = user?['username'] ?? 'Unknown';
+    final userEmail = user?['email'] ?? 'unknown';
+
     return GestureDetector(
       onTap: () async {
-        final updatedUser = await Navigator.push<User>(
+        Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => EditUsernameScreen(user: user),
-          ),
+          MaterialPageRoute(builder: (_) => const EditUsernameScreen())
         );
-
-        if (updatedUser != null) {
-          onUserUpdated(updatedUser);
-        }
       },
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -39,7 +35,7 @@ class ProfileCard extends StatelessWidget {
               radius: 28,
               backgroundColor: const Color(0xFF004D40),
               child: Text(
-                user.userName.isNotEmpty ? user.userName[0].toUpperCase() : '?',
+                userName.isNotEmpty ? userName[0].toUpperCase() : '?',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 22,
@@ -53,7 +49,7 @@ class ProfileCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    user.userName,
+                    userName,
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
@@ -62,7 +58,7 @@ class ProfileCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    user.userEmail,
+                    userEmail,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[500],

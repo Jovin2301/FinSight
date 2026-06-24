@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/expense.dart';
 import 'add_expense_screen.dart';
+import 'package:provider/provider.dart';
+import './auth_provider.dart';
 
 class HomeContent extends StatelessWidget {
   final List<Expense> expenses;
@@ -72,6 +74,7 @@ class HomeContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
     final recent = [...expenses]..sort((a, b) => b.date.compareTo(a.date));
     final remaining = monthlyBudget - totalSpent;
     final progress = monthlyBudget > 0
@@ -109,8 +112,8 @@ class HomeContent extends StatelessWidget {
                         'Good morning 👋',
                         style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                       ),
-                      const Text(
-                        'Vinjo',
+                      Text(
+                        '${user?['username'] ?? 'Unknown'}',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,

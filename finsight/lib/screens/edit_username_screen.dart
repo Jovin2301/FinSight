@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../models/user.dart';
+import 'package:provider/provider.dart';
 import '../constants/app_colors.dart';
+import '../screens/auth_provider.dart';
 
 class EditUsernameScreen extends StatefulWidget {
-  final User? user;
+  final Map<String, dynamic>? user;
   const EditUsernameScreen({super.key, this.user});
 
   @override
@@ -18,15 +19,18 @@ class _EditUsernameScreenState extends State<EditUsernameScreen> {
   void initState() {
     super.initState();
 
-    final user = widget.user;
-    if (user != null) {
-      _userName.text = user.userName;
-      _userEmail.text = user.userEmail;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<AuthProvider>().user;
+      print('user in edit screen: $user'); // check what's here
+      if (user != null) {
+        _userName.text = user['username'] ?? '';
+        _userEmail.text = user['email'] ?? '';
+        setState(() {});
+      }
+    });
   }
 
   void _saveDetails() {
-    final user = widget.user;
     final name = _userName.text.trim();
     final email = _userEmail.text.trim();
 
@@ -37,29 +41,26 @@ class _EditUsernameScreenState extends State<EditUsernameScreen> {
       return;
     }
 
-    if (user == null) return;
-
-    final updatedUser = User(
-      userID: user.userID,
-      userName: name,
-      userEmail: email,
-      userMonthlyIncome: user.userMonthlyIncome,
-      lastLogin: user.lastLogin,
-      authMethod: user.authMethod,
-      password: user.password,
-    );
+    // build updated map, keeping existing fields and overwriting the changed ones
+    final updatedUser = {
+      ...?widget.user,       // spread existing fields (userID, userMonthlyIncome, etc.)
+      'userName': name,
+      'userEmail': email,
+    };
 
     Navigator.pop(context, updatedUser);
   }
 
   @override
   Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Edit User Details',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.darkText,
@@ -79,43 +80,64 @@ class _EditUsernameScreenState extends State<EditUsernameScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+
+              // ── Username ──
+              const Text(
+                'Username',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.darkText,
+                ),
+              ),
+              const SizedBox(height: 6),
               TextField(
                 controller: _userName,
-                decoration: const InputDecoration(
-                  hintText: 'username',
+                decoration: InputDecoration(
+                  hintText: user?['userName'] ?? 'Enter username',
                   floatingLabelBehavior: FloatingLabelBehavior.never,
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     Icons.person_2_rounded,
                     color: AppColors.primaryTeal,
                     size: 22,
                   ),
-                  prefixIconConstraints: BoxConstraints(
+                  prefixIconConstraints: const BoxConstraints(
                     minWidth: 52,
                     minHeight: 52,
                   ),
                 ),
               ),
               const SizedBox(height: 14),
+
+              // ── Email ──
+              const Text(
+                'Email',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.darkText,
+                ),
+              ),
+              const SizedBox(height: 6),
               TextField(
                 controller: _userEmail,
-                onChanged: (_) {
-                  setState(() {});
-                },
-                decoration: const InputDecoration(
-                  hintText: 'User Email',
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  hintText: user?['userEmail'] ?? 'Enter email',
                   floatingLabelBehavior: FloatingLabelBehavior.never,
-                  prefixIcon: Icon(
+                  prefixIcon: const Icon(
                     Icons.email_rounded,
                     color: AppColors.primaryTeal,
                     size: 22,
                   ),
-                  prefixIconConstraints: BoxConstraints(
+                  prefixIconConstraints: const BoxConstraints(
                     minWidth: 52,
                     minHeight: 52,
                   ),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 24),
+
               SizedBox(
                 width: double.infinity,
                 height: 52,

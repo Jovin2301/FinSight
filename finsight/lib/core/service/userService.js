@@ -1,8 +1,26 @@
 const db = require('../database');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
-// GET USER
+const jwt = require('jsonwebtoken');
 
+function authMiddleware(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.userId = decoded.userId; // attach it to the request for downstream handlers
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Invalid or expired token' });
+    }
+}
+
+// GET USER
 async function getUserById(id) {
     const result = await db.query(
         `SELECT * FROM public."User"
@@ -16,10 +34,30 @@ async function getUserById(id) {
 // get user by email for login purpose
 async function getUserByEmail(email) {
     const result = await db.query(
-        `SELECT * FROM public."User" WHERE "userEmail" = $1`,
+        `SELECT * FROM public."User" WHERE LOWER("userEmail") = LOWER($1)`,
         [email]
     );
     return result.rows[0];
+}
+
+async function loginUser(email, password) {
+    const result = await db.query(
+        `SELECT * FROM public."User" WHERE LOWER("userEmail") = LOWER($1)`,
+        [email]
+    );
+    const user = result.rows[0];
+    if (!user) throw new Error('Invalid credentials');
+
+    const match = await bcrypt.compare(password, user.userPassword);
+    if (!match) throw new Error('Invalid credentials');
+
+    const token = jwt.sign(
+        { userId: user.userID }, 
+        process.env.JWT_SECRET,  // a long random string, kept in .env, never hardcoded
+        { expiresIn: '7d' }
+    );
+
+    return { token, user: { id: user.userID, username: user.userName, email: user.userEmail } };
 }
 
 async function registerUser(user) {
@@ -58,7 +96,9 @@ async function registerUser(user) {
 // });
 
 module.exports = {
+    authMiddleware,
     registerUser,
     getUserById,
+    loginUser,
     getUserByEmail
 };

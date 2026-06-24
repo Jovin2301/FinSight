@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const { getUserByEmail } = require('../service/userService');
+const { getUserByEmail, authMiddleware, loginUser } = require('../service/userService');
 const userService = require('../service/userService');
 
-router.get('/:id', async (req, res) => {
+
+router.get('/:id', authMiddleware, async (req, res) => {
     console.log('ID received:', req.params.id);
 
     try {
@@ -19,7 +20,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // User login logic - 'localhost/user/login'
-router.post('/login', async (req, res) => {
+/*router.post('/login', authMiddleware, async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await getUserByEmail(email);
@@ -42,11 +43,20 @@ router.post('/login', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});*/
+
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const result = await loginUser(email, password);
+        res.status(200).json(result); // sends back { token, user }
+    } catch (err) {
+        res.status(401).json({ error: err.message });
+    }
 });
 
-
 // creating / registering user
-router.post('/register', async (req, res) => {
+router.post('/register', authMiddleware, async (req, res) => {
     console.log('body', req.body);
     try {
         const user = await userService.registerUser(req.body);
