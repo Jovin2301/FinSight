@@ -39,6 +39,7 @@ class TransactionsScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Transactions')),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'addTrans',
         onPressed: () => _openForm(context),
         child: const Icon(Icons.add),
       ),

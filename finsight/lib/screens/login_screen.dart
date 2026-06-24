@@ -57,14 +57,10 @@ class _LoginScreenState extends State<LoginScreen> {
             data['token'],
             data['user'],
           );
-          print('full response: $data');        // everything the server sent
-          print('user object: ${data['user']}');
-          print('3');
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const MainScreen()),
           );
-          print('4');
         }
         catch (e, stack) {
           print('SETSESSION CRASHED: $e');
