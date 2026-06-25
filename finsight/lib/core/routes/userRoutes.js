@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const { getUserByEmail, authMiddleware, loginUser } = require('../service/userService');
+const { getUserByEmail, authMiddleware, loginUser, updateUserDetail} = require('../service/userService');
 const userService = require('../service/userService');
 
 
@@ -60,6 +60,17 @@ router.post('/register', authMiddleware, async (req, res) => {
     console.log('body', req.body);
     try {
         const user = await userService.registerUser(req.body);
+        res.status(201).json(user);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// editing the username and email for user 
+router.post('/updateUserDetail', authMiddleware, async (req, res) => {
+    try {
+        const user = await userService.updateUserDetail(req.body);
         res.status(201).json(user);
     } catch (err) {
         res.status(500).json({ error: err.message });

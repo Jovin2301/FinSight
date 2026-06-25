@@ -40,6 +40,7 @@ async function getUserByEmail(email) {
     return result.rows[0];
 }
 
+
 async function loginUser(email, password) {
     const result = await db.query(
         `SELECT * FROM public."User" WHERE LOWER("userEmail") = LOWER($1)`,
@@ -84,21 +85,29 @@ async function registerUser(user) {
     return result.rows[0];
 }
 
+// UPDATE 
+async function updateUserDetail(user) {
+    const result = await db.query(
+        `UPDATE public."User"
+        SET "userName" = $1,
+            "userEmail" = $2
+        WHERE "userID" = $3
+        RETURNING *`,
+        [
+            user.username,
+            user.email,
+            user.userid
+        ]
+    );
+    return result.rows[0];
+}
 
-// // UPDATE LAST LOGIN (simulate login)
-// router.put('/login/:id', async (req, res) => {
-//     try {
-//         const user = await userService.updateLastLogin(req.params.userID);
-//         res.json(user);
-//     } catch (err) {
-//         res.status(500).json({ error: err.message });
-//     }
-// });
 
 module.exports = {
     authMiddleware,
     registerUser,
     getUserById,
     loginUser,
-    getUserByEmail
+    getUserByEmail,
+    updateUserDetail
 };

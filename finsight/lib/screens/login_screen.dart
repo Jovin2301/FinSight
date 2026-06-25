@@ -1,10 +1,8 @@
-import 'package:finsight/screens/main_navigation_screen.dart';
 import 'package:finsight/screens/register_screen.dart';
 import 'package:flutter/material.dart';
 import './main_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:dotenv/dotenv.dart';
 import './auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';

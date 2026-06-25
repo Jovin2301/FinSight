@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -64,6 +62,17 @@ class AuthProvider extends ChangeNotifier {
     }
 
     notifyListeners(); // ← this is what tells the rest of the app "user is now logged in"
+  }
+
+  void updateUser(Map<String, dynamic> updatedUser) {
+    print("UPDATED USER:");
+    print(updatedUser);
+
+    _user = {
+      ..._user ?? {},
+      ...updatedUser,
+    };
+    notifyListeners();
   }
 
   // called on logout

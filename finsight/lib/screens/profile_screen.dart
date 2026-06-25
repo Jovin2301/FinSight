@@ -1,5 +1,8 @@
+import 'package:finsight/screens/help_center.dart';
 import 'package:finsight/screens/login_screen.dart';
 import 'package:currency_picker/currency_picker.dart';
+import 'package:finsight/screens/private_policy.dart';
+import 'package:finsight/screens/term_service.dart';
 import 'package:flutter/material.dart';
 import '../widgets/profile_card.dart';
 import './auth_provider.dart';
@@ -121,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               user: user,
               onUserUpdated: (user) => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const EditUsernameScreen())
+                MaterialPageRoute(builder: (_) => const EditUserDetailsScreen())
               ),
             ),
             const SizedBox(height: 24),
@@ -194,34 +197,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _sectionTitle('Support'),
             const SizedBox(height: 12),
             _settingsTile('Help Center', 
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Feature not available yet'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HelpCenterScreen())
+              ),
             ),
             _settingsTile('Privacy Policy', 
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Feature not available yet'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen())
+              ),
             ),
             _settingsTile('Terms of Service', 
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Feature not available yet'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const TermsOfServiceScreen())
+              ),
             ),
             const SizedBox(height: 32),
 
