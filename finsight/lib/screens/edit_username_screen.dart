@@ -373,34 +373,18 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                 _ActionRow(
                   icon: Icons.lock_rounded,
                   label: 'Change Password',
-                  onTap: () {},
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Feature not available yet'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
                 ),
                 const _Divider(),
-                _ActionRow(
-                  icon: Icons.shield_rounded,
-                  label: 'Two-Factor Authentication',
-                  trailing: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE6F4F3),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Text(
-                      'Off',
-                      style: TextStyle(
-                          fontSize: 11,
-                          color: _tealDark,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  onTap: () {},
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 14),
-
+              ]
+            )
           ],
         ),
       ),
@@ -519,7 +503,9 @@ class _FieldItem extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.edit_rounded, color: Colors.grey[300], size: 16),
+          Center(
+            child: Icon(Icons.edit_rounded, color: Colors.grey[300], size: 16),
+          ),
         ],
       ),
     );

@@ -17,34 +17,7 @@ class AuthProvider extends ChangeNotifier {
   Map<String, dynamic>? get user => _user;
   bool get isLoggedIn => _token != null;
 
-  // called after successful login
-  // Future<void> setSession(String token, Map<String, dynamic> user) async {
-  //   _token = token;
-  //   _user = user;
-  //   await _storage.write(key: 'token', value: token);
-  //   notifyListeners(); // tells all screens "hey, something changed"
-  // }c
-
-  /*Future<void> setSession(String token, String userId) async {
-    try {
-      const storage = FlutterSecureStorage(
-        iOptions: IOSOptions(
-          accessibility: KeychainAccessibility.first_unlock_this_device,
-        ),
-      );
-      await storage.write(key: 'token', value: token);
-    } catch (e) {
-      if (kDebugMode) {
-        // Simulator fallback - never use in production
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', token);
-        print('Used SharedPreferences fallback (simulator only)');
-      } else {
-        rethrow; // Let production errors surface
-      }
-    }
-  }*/
-
+  
   Future<void> setSession(String token, Map<String, dynamic> user) async {
     _token = token;
     _user = user;
@@ -116,3 +89,4 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+

@@ -42,7 +42,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 child: SafeArea(
                   child: Padding(
                     padding:
-                        const EdgeInsets.fromLTRB(20, 52, 20, 20),
+                        const EdgeInsets.fromLTRB(20, 53, 20, 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -84,15 +84,6 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              title: const Text(
-                'Privacy Policy',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700),
-              ),
-              titlePadding:
-                  const EdgeInsets.only(left: 56, bottom: 16),
             ),
           ),
 
