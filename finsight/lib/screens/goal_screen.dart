@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/goal.dart';
 import '../widgets/goal_card.dart';
+import '../widgets/notification_bell.dart';
 
 class GoalScreen extends StatelessWidget {
   final List<Goal> goals;
   final ValueChanged<Goal> onAddGoal;
   final void Function(int index, Goal goal) onUpdateGoal;
   final ValueChanged<int> onDeleteGoal;
+  final int unreadNotifications;
+  final VoidCallback onNotificationsTap;
 
   const GoalScreen({
     super.key,
@@ -15,6 +18,8 @@ class GoalScreen extends StatelessWidget {
     required this.onAddGoal,
     required this.onUpdateGoal,
     required this.onDeleteGoal,
+    required this.unreadNotifications,
+    required this.onNotificationsTap,
   });
 
   Future<void> _openForm(BuildContext context, [int? index]) async {
@@ -131,7 +136,18 @@ class GoalScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: const Text('Goals')),
+      appBar: AppBar(
+        title: const Text('Goals'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: NotificationBell(
+              unreadCount: unreadNotifications,
+              onTap: onNotificationsTap,
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'addGoal',
         onPressed: () => _openForm(context),
