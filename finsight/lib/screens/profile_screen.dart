@@ -1,10 +1,16 @@
+import 'package:finsight/screens/help_center.dart';
 import 'package:finsight/screens/login_screen.dart';
 import 'package:currency_picker/currency_picker.dart';
+import 'package:finsight/screens/private_policy.dart';
+import 'package:finsight/screens/term_service.dart';
 import 'package:flutter/material.dart';
 import '../widgets/profile_card.dart';
 import './auth_provider.dart';
 import 'package:provider/provider.dart';
 import './edit_username_screen.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -17,6 +23,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedCurrency = 'SGD';
   String _selectedBudgetCycle = 'Monthly';
   String _selectedIncomeType = 'Salaried';
+  String _selectedAppNotification = 'Enabled';
+  String _selectedTheme = 'Light';
+  DateTime? _selectedBudgetCycleDate;
+  bool _prefsLoaded = false;
 
   Future<void> _openLoginScreen() async {
     Navigator.push(
@@ -25,6 +35,112 @@ class _ProfileScreenState extends State<ProfileScreen> {
         builder: (context) => const LoginScreen(),
       ),
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_prefsLoaded) {
+      _prefsLoaded = true;
+      _loadPreferences(); // ← call here instead of initState
+    }
+  }
+  
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Future<void> _loadPreferences() async {
+    final authProvider = context.read<AuthProvider>();
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['BASE_URL']}/user/getUserPreferences'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${authProvider.token}',
+        },
+      );
+
+      print('Prefs status: ${response.statusCode}');
+      print('Prefs body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        final prefs = jsonDecode(response.body);
+        
+        setState(() {
+          _selectedCurrency = prefs['prefCurrency'] ?? 'SGD';
+          _selectedBudgetCycle = prefs['prefBudgetCycle'] ?? 'Monthly';
+          _selectedIncomeType = prefs['prefIncomeType'] ?? 'Salaried';
+          _selectedTheme = prefs['prefTheme'] ?? 'Light Mode';
+          _selectedAppNotification = (prefs['prefNotification'] == true) ? 'Enabled' : 'Disabled';
+         
+          if (prefs['prefBudgetCycleDate'] != null) {
+            final day = (prefs['prefBudgetCycleDate'] as num).toInt();
+            final now = DateTime.now();
+            _selectedBudgetCycleDate = DateTime(now.year, now.month, day);
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading preferences: $e');
+    }
+  }
+
+  Future<void> _savePreferences({
+    String? currency,
+    String? budgetCycle,
+    String? incomeType,
+    String? theme,
+    String? notification,
+    DateTime? budgetCycleDate,
+  }) async {
+    final authProvider = context.read<AuthProvider>();
+    try {
+      final response = await http.post(
+        Uri.parse('${dotenv.env['BASE_URL']}/user/updateUserPreferences'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${authProvider.token}',
+        },
+        body: jsonEncode({
+          if (currency != null) 'currency': currency,           // → prefCurrency
+          if (incomeType != null) 'incomeType': incomeType,     // → prefIncomeType
+          if (budgetCycle != null) 'prefBudgetCycle': budgetCycle, // → prefBudgetCycle
+          if (budgetCycleDate != null) 'budgetCycleDate': budgetCycleDate.day, // ← just the day number e.g. 15
+          if (notification != null) 'notification': notification, // → prefNotification (converted to bool in backend)
+          if (theme != null) 'prefTheme': theme,                // → prefTheme
+        }),
+      );
+
+      print('Status: ${response.statusCode}');
+      print('Body: ${response.body}');
+
+      if (response.statusCode != 201) throw Exception('Failed to save');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preferences saved')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+  void _showDatePicker() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedBudgetCycleDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() => _selectedBudgetCycleDate = picked);
+      _savePreferences(budgetCycleDate: picked);
+    }
   }
 
   void _showPicker({
@@ -121,7 +237,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               user: user,
               onUserUpdated: (user) => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const EditUsernameScreen())
+                MaterialPageRoute(builder: (_) => const EditUserDetailsScreen())
               ),
             ),
             const SizedBox(height: 24),
@@ -129,13 +245,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // Budget Preferences 
             _sectionTitle('Budget Preferences'),
             const SizedBox(height: 12),
-            _settingsTile('Default Currency', value: _selectedCurrency, onTap: () {
-              showCurrencyPicker(
+            _settingsTile('Default Currency', 
+              value: _selectedCurrency, 
+              onTap: () {
+                showCurrencyPicker(
                   context: context,
                   onSelect: (Currency currency) {
-                    setState(() {
-                      _selectedCurrency = currency.code;
-                    });
+                    setState(() => _selectedCurrency = currency.code);
+                    _savePreferences(currency: currency.code); 
                   },
                 );
               }),
@@ -143,10 +260,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               value: _selectedIncomeType,
               onTap: () {
                 _showPicker(
-                  title: 'Select Preferred Budget Cycle',
+                  title: 'Select Preferred Income Type',
                   options: ['Salaried', 'Freelance', 'Hourly', 'Commission'],
                   selected: _selectedIncomeType,
-                  onSelect: (val) => setState(() => _selectedIncomeType = val),
+                  onSelect: (val) {
+                    setState(() => _selectedIncomeType = val);
+                    _savePreferences(incomeType: val); 
+                  },
                 );
               },
             ),
@@ -157,9 +277,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: 'Select Preferred Budget Cycle',
                   options: ['Bi-Monthly', 'Monthly', 'Weekly', 'Daily'],
                   selected: _selectedBudgetCycle,
-                  onSelect: (val) => setState(() => _selectedBudgetCycle = val),
+                  onSelect: (val) {
+                    setState(() => _selectedBudgetCycle = val);
+                    _savePreferences(budgetCycle: val); 
+                  }
                 );
               },
+            ),
+            _settingsTile(
+              'Budget Cycle Date',
+              value: _selectedBudgetCycleDate != null
+                  ? 'Day ${_selectedBudgetCycleDate!.day}'  // shows "Day 15"
+                  : 'Not set',
+              onTap: _showDatePicker,
             ),
             const SizedBox(height: 24),
 
@@ -167,24 +297,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _sectionTitle('App Settings'),
             const SizedBox(height: 12),
             _settingsTile('Notifications',
-              value: 'Enabled',
+              value: _selectedAppNotification,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Feature not available yet'),
-                    duration: Duration(seconds: 2),
-                  ),
+                _showPicker(
+                  title: 'Select App Notification',
+                  options: ['Enabled', 'Disabled'],
+                  selected: _selectedAppNotification,
+                  onSelect: (val) {
+                    setState(() => _selectedAppNotification = val);
+                    _savePreferences(notification: val); 
+                  }
                 );
               },
             ),
             _settingsTile('Appearance',
-              value: 'Light Mode',
+              value: _selectedTheme,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Feature not available yet'),
-                    duration: Duration(seconds: 2),
-                  ),
+                _showPicker(
+                  title: 'Select App Appearance',
+                  options: ['Light Mode', 'Dark Mode'],
+                  selected: _selectedTheme,
+                  onSelect: (val) {
+                    setState(() => _selectedTheme = val);
+                    _savePreferences(theme: val); 
+                  }
                 );
               },
             ),
@@ -194,34 +330,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _sectionTitle('Support'),
             const SizedBox(height: 12),
             _settingsTile('Help Center', 
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Feature not available yet'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HelpCenterScreen())
+              ),
             ),
             _settingsTile('Privacy Policy', 
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Feature not available yet'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen())
+              ),
             ),
             _settingsTile('Terms of Service', 
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Feature not available yet'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const TermsOfServiceScreen())
+              ),
             ),
             const SizedBox(height: 32),
 
