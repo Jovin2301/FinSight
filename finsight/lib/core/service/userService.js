@@ -14,9 +14,12 @@ async function updateUserPreferences(preferences, user) {
   if (exists.rows.length === 0) {
     await db.query(
       `INSERT INTO public."userPreference" 
-      ("userID", "prefCurrency", "prefTheme", "prefNotification", "prefBudgetCycle", "prefIncomeType", "prefBudgetCycleDate")
-      VALUES ($1, 'SGD', 'Light', true, 'Monthly', 'Salaried', 1)`,
-      [user.userid]
+      ("prefID", "userID", "prefCurrency", "prefTheme", "prefNotification", "prefBudgetCycle", "prefIncomeType", "prefBudgetCycleDate")
+      VALUES ($1, $2, 'SGD', 'Light', true, 'Monthly', 'Salaried', 1)`,
+      [
+        uuidv4(),
+        user.userid
+      ]
     );
   }
 
