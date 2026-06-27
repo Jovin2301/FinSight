@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/goal.dart';
+import '../widgets/notification_bell.dart';
 // ─────────────────────────────────────────────────────────────
 
 class GoalScreen extends StatelessWidget {
@@ -7,6 +8,8 @@ class GoalScreen extends StatelessWidget {
   final ValueChanged<Goal> onAddGoal;
   final void Function(int index, Goal goal) onUpdateGoal;
   final ValueChanged<int> onDeleteGoal;
+  final int unreadNotifications;
+  final VoidCallback onNotificationsTap;
 
   const GoalScreen({
     super.key,
@@ -14,6 +17,8 @@ class GoalScreen extends StatelessWidget {
     required this.onAddGoal,
     required this.onUpdateGoal,
     required this.onDeleteGoal,
+    required this.unreadNotifications,
+    required this.onNotificationsTap,
   });
 
   static const Color _tealDark  = Color(0xFF2D7D7B);
@@ -110,6 +115,15 @@ class GoalScreen extends StatelessWidget {
               color: _inkDark, fontSize: 18, fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: NotificationBell(
+              unreadCount: unreadNotifications,
+              onTap: onNotificationsTap,
+            ),
+          ),
+        ],
       ),
       floatingActionButton: GestureDetector(
         onTap: () => _openForm(context),

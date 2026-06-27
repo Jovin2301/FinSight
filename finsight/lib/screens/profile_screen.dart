@@ -11,9 +11,17 @@ import './edit_username_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert';
+import '../widgets/notification_bell.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final int unreadNotifications;
+  final VoidCallback onNotificationsTap;
+
+  const ProfileScreen({
+    super.key,
+    required this.unreadNotifications,
+    required this.onNotificationsTap,
+  });
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -225,6 +233,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         foregroundColor: const Color(0xFF1E1E2D),
         elevation: 0,
         toolbarHeight: 70,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: NotificationBell(
+              unreadCount: widget.unreadNotifications,
+              onTap: widget.onNotificationsTap,
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
