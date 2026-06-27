@@ -2,20 +2,27 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/expense.dart';
 import '../widgets/expense_card.dart';
+import '../widgets/notification_bell.dart';
 import 'add_expense_screen.dart';
 
 class TransactionsScreen extends StatefulWidget {
   final List<Expense> expenses;
+  final Map<String, String> categoryIcons;
   final ValueChanged<Expense> onAddExpense;
   final void Function(int index, Expense expense) onUpdateExpense;
   final ValueChanged<int> onDeleteExpense;
+  final int unreadNotifications;
+  final VoidCallback onNotificationsTap;
 
   const TransactionsScreen({
     super.key,
     required this.expenses,
+    this.categoryIcons = const {},
     required this.onAddExpense,
     required this.onUpdateExpense,
     required this.onDeleteExpense,
+    required this.unreadNotifications,
+    required this.onNotificationsTap,
   });
 
   @override
@@ -27,12 +34,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   String _selectedDate = 'All';
 
   Future<void> _openForm(BuildContext context, [int? index]) async {
-    final expense = await Navigator.push<Expense>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AddExpenseScreen(
-          expense: index == null ? null : widget.expenses[index],
-        ),
+    final expense = await showDialog<Expense>(
+      context: context,
+      builder: (_) => AddExpenseScreen(
+        expense: index == null ? null : widget.expenses[index],
       ),
     );
 
@@ -234,7 +239,18 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: const Text('Transactions')),
+      appBar: AppBar(
+        title: const Text('Transactions'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: NotificationBell(
+              unreadCount: widget.unreadNotifications,
+              onTap: widget.onNotificationsTap,
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'addTrans',
         onPressed: () => _openForm(context),

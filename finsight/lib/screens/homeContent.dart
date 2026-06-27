@@ -6,6 +6,7 @@ import '../models/goal.dart';
 import 'add_expense_screen.dart';
 import 'package:provider/provider.dart';
 import './auth_provider.dart';
+import '../widgets/notification_bell.dart';
 
 class HomeContent extends StatelessWidget {
   final List<Expense> expenses;
@@ -15,6 +16,8 @@ class HomeContent extends StatelessWidget {
   final ValueChanged<Expense> onAddExpense;
   final ValueChanged<double> onBudgetChanged;
   final VoidCallback onViewTransactions;
+  final int unreadNotifications;
+  final VoidCallback onNotificationsTap;
 
   const HomeContent({
     super.key,
@@ -25,6 +28,8 @@ class HomeContent extends StatelessWidget {
     required this.onAddExpense,
     required this.onBudgetChanged,
     required this.onViewTransactions,
+    required this.unreadNotifications,
+    required this.onNotificationsTap,
   });
 
   double get totalSpent => expenses.fold(0, (sum, e) => sum + e.amount);
@@ -55,9 +60,9 @@ class HomeContent extends StatelessWidget {
   }
 
   Future<void> _addExpense(BuildContext context) async {
-    final expense = await Navigator.push<Expense>(
-      context,
-      MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
+    final expense = await showDialog<Expense>(
+      context: context,
+      builder: (_) => const AddExpenseScreen(),
     );
     if (expense != null) onAddExpense(expense);
   }
@@ -148,7 +153,11 @@ class HomeContent extends StatelessWidget {
                 ),
                 _headerIcon(Icons.search_rounded, () {}),
                 const SizedBox(width: 8),
-                _headerIcon(Icons.notifications_outlined, () {}),
+                NotificationBell(
+                  unreadCount: unreadNotifications,
+                  onTap: onNotificationsTap,
+                  boxed: true,
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -202,10 +211,7 @@ class HomeContent extends StatelessWidget {
                     isOverBudget
                         ? 'Over budget this month'
                         : 'Within budget this month',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                    ),
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                   const SizedBox(height: 16),
                   Row(

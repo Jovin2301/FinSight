@@ -5,9 +5,17 @@ import '../widgets/profile_card.dart';
 import './auth_provider.dart';
 import 'package:provider/provider.dart';
 import './edit_username_screen.dart';
+import '../widgets/notification_bell.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final int unreadNotifications;
+  final VoidCallback onNotificationsTap;
+
+  const ProfileScreen({
+    super.key,
+    required this.unreadNotifications,
+    required this.onNotificationsTap,
+  });
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -21,9 +29,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _openLoginScreen() async {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 
@@ -54,19 +60,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              ...options.map((option) => ListTile(
-                title: Text(option),
-                trailing: selected == option
-                    ? const Icon(Icons.check_circle, color: Color(0xFF00897B))
-                    : null,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+              ...options.map(
+                (option) => ListTile(
+                  title: Text(option),
+                  trailing: selected == option
+                      ? const Icon(Icons.check_circle, color: Color(0xFF00897B))
+                      : null,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  onTap: () {
+                    onSelect(option);
+                    Navigator.pop(context);
+                  },
                 ),
-                onTap: () {
-                  onSelect(option);
-                  Navigator.pop(context);
-                },
-              )),
+              ),
               const SizedBox(height: 12),
             ],
           ),
@@ -74,12 +82,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
-    return 
-    Scaffold(
+    return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Column(
@@ -87,10 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             const Text(
               'Profile',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
             ),
             const SizedBox(height: 6),
             Container(
@@ -98,7 +102,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 4,
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF004D40), Color(0xFF00897B), Color(0xFF4DB6AC)],
+                  colors: [
+                    Color(0xFF004D40),
+                    Color(0xFF00897B),
+                    Color(0xFF4DB6AC),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(2),
               ),
@@ -109,28 +117,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
         foregroundColor: const Color(0xFF1E1E2D),
         elevation: 0,
         toolbarHeight: 70,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: NotificationBell(
+              unreadCount: widget.unreadNotifications,
+              onTap: widget.onNotificationsTap,
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             // profile card
             ProfileCard(
               user: user,
               onUserUpdated: (user) => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const EditUsernameScreen())
+                MaterialPageRoute(builder: (_) => const EditUsernameScreen()),
               ),
             ),
             const SizedBox(height: 24),
 
-            // Budget Preferences 
+            // Budget Preferences
             _sectionTitle('Budget Preferences'),
             const SizedBox(height: 12),
-            _settingsTile('Default Currency', value: _selectedCurrency, onTap: () {
-              showCurrencyPicker(
+            _settingsTile(
+              'Default Currency',
+              value: _selectedCurrency,
+              onTap: () {
+                showCurrencyPicker(
                   context: context,
                   onSelect: (Currency currency) {
                     setState(() {
@@ -138,8 +157,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     });
                   },
                 );
-              }),
-            _settingsTile('Income Type',
+              },
+            ),
+            _settingsTile(
+              'Income Type',
               value: _selectedIncomeType,
               onTap: () {
                 _showPicker(
@@ -150,7 +171,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               },
             ),
-            _settingsTile('Budget Cycle',
+            _settingsTile(
+              'Budget Cycle',
               value: _selectedBudgetCycle,
               onTap: () {
                 _showPicker(
@@ -166,7 +188,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // ── App Settings ──
             _sectionTitle('App Settings'),
             const SizedBox(height: 12),
-            _settingsTile('Notifications',
+            _settingsTile(
+              'Notifications',
               value: 'Enabled',
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -177,7 +200,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               },
             ),
-            _settingsTile('Appearance',
+            _settingsTile(
+              'Appearance',
               value: 'Light Mode',
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -193,7 +217,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             // ── Support ──
             _sectionTitle('Support'),
             const SizedBox(height: 12),
-            _settingsTile('Help Center', 
+            _settingsTile(
+              'Help Center',
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -201,9 +226,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     duration: Duration(seconds: 2),
                   ),
                 );
-              }
+              },
             ),
-            _settingsTile('Privacy Policy', 
+            _settingsTile(
+              'Privacy Policy',
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -211,9 +237,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     duration: Duration(seconds: 2),
                   ),
                 );
-              }
+              },
             ),
-            _settingsTile('Terms of Service', 
+            _settingsTile(
+              'Terms of Service',
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -221,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     duration: Duration(seconds: 2),
                   ),
                 );
-              }
+              },
             ),
             const SizedBox(height: 32),
 
@@ -269,7 +296,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  static Widget _settingsTile(String label, {String? value, required VoidCallback onTap}) {
+  static Widget _settingsTile(
+    String label, {
+    String? value,
+    required VoidCallback onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: GestureDetector(
@@ -284,26 +315,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Color(0xFF1E1E2D),
-                ),
+                style: const TextStyle(fontSize: 15, color: Color(0xFF1E1E2D)),
               ),
               const Spacer(),
               if (value != null)
                 Text(
                   value,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 ),
               const SizedBox(width: 6),
-              Icon(
-                Icons.chevron_right,
-                color: Colors.grey[400],
-                size: 20,
-              ),
+              Icon(Icons.chevron_right, color: Colors.grey[400], size: 20),
             ],
           ),
         ),
