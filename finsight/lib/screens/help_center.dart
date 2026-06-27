@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'account_login_screen.dart';
+import 'financial_data_screen.dart';
+import 'privacy_security_screen.dart';
+import 'app_feature_screen.dart';
+import 'trouble_shooting_screen.dart';
+import 'contactUs_screen.dart';
 
 class HelpCenterScreen extends StatefulWidget {
   const HelpCenterScreen({super.key});
@@ -49,14 +55,50 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
     ),
   ];
 
-  final List<_TopicItem> _topics = const [
-    _TopicItem(icon: Icons.key_rounded, label: 'Account\n& Login', color: Color(0xFF2D7D7B)),
-    _TopicItem(icon: Icons.bar_chart_rounded, label: 'Financial\nData', color: Color(0xFF2D7D7B)),
-    _TopicItem(icon: Icons.lock_rounded, label: 'Privacy\n& Security', color: Color(0xFF2D7D7B)),
-    _TopicItem(icon: Icons.auto_awesome_rounded, label: 'App\nFeatures', color: Color(0xFF2D7D7B)),
-    _TopicItem(icon: Icons.build_rounded, label: 'Trouble-\nshooting', color: Color(0xFF2D7D7B)),
-    _TopicItem(icon: Icons.chat_bubble_rounded, label: 'Contact\nUs', color: Color(0xFF2D7D7B)),
-  ];
+  late final List<_TopicItem> _topics;
+
+  @override
+  void initState() {
+    super.initState();
+    _topics = [
+      _TopicItem(
+        icon: Icons.key_rounded,
+        label: 'Account\n& Login',
+        color: const Color(0xFF2D7D7B),
+        screen: const AccountLoginScreen(),
+      ),
+      _TopicItem(
+        icon: Icons.bar_chart_rounded,
+        label: 'Financial\nData',
+        color: const Color(0xFF2D7D7B),
+        screen: const FinancialDataScreen(),
+      ),
+      _TopicItem(
+        icon: Icons.lock_rounded,
+        label: 'Privacy\n& Security',
+        color: const Color(0xFF2D7D7B),
+        screen: const PrivacySecurityScreen(),
+      ),
+      _TopicItem(
+        icon: Icons.auto_awesome_rounded,
+        label: 'App\nFeatures',
+        color: const Color(0xFF2D7D7B),
+        screen: const AppFeaturesScreen(),
+      ),
+      _TopicItem(
+        icon: Icons.build_rounded,
+        label: 'Trouble-\nshooting',
+        color: const Color(0xFF2D7D7B),
+        screen: const TroubleshootingScreen(),
+      ),
+      _TopicItem(
+        icon: Icons.chat_bubble_rounded,
+        label: 'Contact\nUs',
+        color: const Color(0xFF2D7D7B),
+        screen: const ContactUsScreen(),
+      ),
+    ];
+  }
 
   @override
   void dispose() {
@@ -132,7 +174,8 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                           _searchController.clear();
                           setState(() => _searchQuery = '');
                         },
-                        child: Icon(Icons.close_rounded, color: Colors.grey[400]),
+                        child:
+                            Icon(Icons.close_rounded, color: Colors.grey[400]),
                       )
                     : null,
                 border: InputBorder.none,
@@ -233,28 +276,16 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                 const SizedBox(height: 6),
                 Text(
                   'Our team is happy to assist you.',
-                  style: TextStyle(
-                      color: Colors.white.withOpacity(0.8), fontSize: 13),
+                  style:
+                      TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
                 ),
                 const SizedBox(height: 16),
                 GestureDetector(
-                  onTap: () => {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                          'Feature soon to be developed.'
-                        ),
-                        behavior: SnackBarBehavior.floating,
-                        duration: const Duration(seconds: 5),
-                        action: SnackBarAction(
-                          label: 'Dismiss',
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                          },
-                        ),
-                      ),
-                    )
-                  },
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const ContactUsScreen()),
+                  ),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 24, vertical: 12),
@@ -263,7 +294,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Text(
-                      'Email Support',
+                      'Contact Us',
                       style: TextStyle(
                         color: Color(0xFF2D7D7B),
                         fontWeight: FontWeight.w700,
@@ -291,23 +322,10 @@ class _TopicCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              'Feature soon to be developed.'
-            ),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 5),
-            action: SnackBarAction(
-              label: 'Dismiss',
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              },
-            ),
-          ),
-        )
-      },
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => topic.screen),
+      ),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -464,6 +482,11 @@ class _TopicItem {
   final IconData icon;
   final String label;
   final Color color;
-  const _TopicItem(
-      {required this.icon, required this.label, required this.color});
+  final Widget screen;
+  const _TopicItem({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.screen,
+  });
 }
