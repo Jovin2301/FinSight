@@ -3,6 +3,81 @@ const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
 
+//update user preferences
+async function updateUserPreferences(preferences, user) {
+  // Check if row exists, insert default if not
+  const exists = await db.query(
+    `SELECT 1 FROM public."userPreference" WHERE "userID" = $1`,
+    [user.userid]
+  );
+
+  if (exists.rows.length === 0) {
+    await db.query(
+      `INSERT INTO public."userPreference" 
+      ("prefID", "userID", "prefCurrency", "prefTheme", "prefNotification", "prefBudgetCycle", "prefIncomeType", "prefBudgetCycleDate")
+      VALUES ($1, $2, 'SGD', 'Light', true, 'Monthly', 'Salaried', 1)`,
+      [
+        uuidv4(),
+        user.userid
+      ]
+    );
+  }
+
+  // rest of your existing update logic...
+  const fields = [];
+  const values = [];
+  let idx = 1;
+
+  if (preferences.prefBudgetCycle !== undefined) {
+    fields.push(`"prefBudgetCycle" = $${idx++}`);
+    values.push(preferences.prefBudgetCycle);
+  }
+  if (preferences.currency !== undefined) {
+    fields.push(`"prefCurrency" = $${idx++}`);
+    values.push(preferences.currency);
+  }
+  if (preferences.prefTheme !== undefined) {
+    fields.push(`"prefTheme" = $${idx++}`);
+    values.push(preferences.prefTheme);
+  }
+  if (preferences.notification !== undefined) {
+    fields.push(`"prefNotification" = $${idx++}`);
+    values.push(preferences.notification === 'Enabled');
+  }
+  if (preferences.incomeType !== undefined) {
+    fields.push(`"prefIncomeType" = $${idx++}`);
+    values.push(preferences.incomeType);
+  }
+  if (preferences.budgetCycleDate !== undefined) {
+    fields.push(`"prefBudgetCycleDate" = $${idx++}`);
+    values.push(preferences.budgetCycleDate);
+  }
+
+  if (fields.length === 0) return null;
+
+  values.push(user.userid);
+
+  const result = await db.query(
+    `UPDATE public."userPreference"
+     SET ${fields.join(', ')}
+     WHERE "userID" = $${idx}
+     RETURNING *`,
+    values
+  );
+
+  return result.rows[0];
+}
+
+async function getUserPreferences(user) {
+    const result = await db.query(
+        `SELECT * FROM public."userPreference" 
+        WHERE "userID" = $1`,
+        [user.userid]
+    );
+    return result.rows[0];
+}
+
+
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -39,6 +114,7 @@ async function getUserByEmail(email) {
     );
     return result.rows[0];
 }
+
 
 async function loginUser(email, password) {
     const result = await db.query(
@@ -84,21 +160,32 @@ async function registerUser(user) {
     return result.rows[0];
 }
 
+// UPDATE user detail
+async function updateUserDetail(user) {
+    const result = await db.query(
+        `UPDATE public."User"
+        SET "userName" = $1,
+            "userEmail" = $2
+        WHERE "userID" = $3
+        RETURNING *`,
+        [
+            user.username,
+            user.email,
+            user.userid
+        ]
+    );
+    return result.rows[0];
+}
 
-// // UPDATE LAST LOGIN (simulate login)
-// router.put('/login/:id', async (req, res) => {
-//     try {
-//         const user = await userService.updateLastLogin(req.params.userID);
-//         res.json(user);
-//     } catch (err) {
-//         res.status(500).json({ error: err.message });
-//     }
-// });
+
 
 module.exports = {
     authMiddleware,
     registerUser,
     getUserById,
     loginUser,
-    getUserByEmail
+    getUserByEmail,
+    updateUserDetail,
+    updateUserPreferences,
+    getUserPreferences
 };

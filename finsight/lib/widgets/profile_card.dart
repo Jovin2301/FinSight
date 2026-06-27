@@ -20,7 +20,7 @@ class ProfileCard extends StatelessWidget {
       onTap: () async {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const EditUsernameScreen())
+          MaterialPageRoute(builder: (_) => const EditUserDetailsScreen())
         );
       },
       child: Container(
