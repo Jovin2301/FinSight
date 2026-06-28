@@ -632,9 +632,15 @@ class _MainScreenState extends State<MainScreen> {
         onUpdateBudget: _updateBudget,
         onDeleteBudget: _deleteBudget,
       ),
-      GoalScreen(
-      ),
       // Goals
+      GoalScreen(
+        goals: _goals,
+        onAddGoal: _addGoal,
+        onUpdateGoal: _updateGoal,
+        onDeleteGoal: _deleteGoal,
+        unreadNotifications: _unreadNotifications,
+        onNotificationsTap: _openNotifications,
+      ),
       // Profile
       ProfileScreen(
         unreadNotifications: _unreadNotifications,

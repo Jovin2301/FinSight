@@ -31,6 +31,19 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
     _emailController.addListener(_onChanged);
   }
 
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+
+  //   if (_usernameController.text.isEmpty &&
+  //       _emailController.text.isEmpty) {
+  //     final user = context.read<AuthProvider>().user;
+
+  //     _usernameController.text = user?['username'] ?? '';
+  //     _emailController.text = user?['email'] ?? '';
+  //   }
+  // }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -68,6 +81,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
     try {
       final authProvider = context.read<AuthProvider>();
       final user = authProvider.user;
+      print(user);
 
       final response = await http.post(
         Uri.parse('${dotenv.env['BASE_URL']}/user/updateUserDetail'),
@@ -81,6 +95,9 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
           'userid': user?['id']
         }),
       );
+
+      print('code ${response.statusCode}');
+      print('body ${response.body}');
 
       if (response.statusCode == 201) {
         final updatedUser = jsonDecode(response.body);

@@ -77,66 +77,6 @@ async function getUserPreferences(user) {
     return result.rows[0];
 }
 
-//get user saving goals
-async function getSavingGoal(user) {
-    const result = await db.query(
-        `SELECT * FROM public."savingGoals" 
-        WHERE "userID" = $1`,
-        [user.userid]
-    );
-    return result.rows;
-}
-
-//update user saving goals
-async function updateSavingGoal(user, goalId, savingGoal) {
-    const result = await db.query(
-        `UPDATE public."savingGoals"
-         SET "goalName" = $3, "goalDueDate" = $4, "goalTargetAmt" = $5,
-             "goalCurrentAmt" = $6, "goalStatus" = $7, "goalIcon" = $8
-         WHERE "userID" = $1 AND "goalID" = $2
-         RETURNING *;`,
-        [user.userid, goalId, savingGoal.goalName, savingGoal.goalDueDate,
-         savingGoal.goalTargetAmt, savingGoal.goalCurrentAmt, savingGoal.goalStatus, savingGoal.iconEmoji]
-    );
-    return result.rows[0];
-}
-
-//update user saving goals
-async function createSavingGoal(user, savingGoal) {
-    const result = await db.query(
-        `INSERT INTO public."savingGoals" 
-        ("goalID", "userID", "goalName", "goalDueDate", "goalTargetAmt", "goalCurrentAmt", "goalStatus", "goalIcon")
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-        RETURNING *`,
-        [
-            uuidv4(),
-            user.userid,
-            savingGoal.goalName,
-            savingGoal.goalDueDate,
-            savingGoal.goalTargetAmt,
-            savingGoal.goalCurrentAmt,
-            savingGoal.goalStatus,
-            savingGoal.iconEmoji
-        ]
-    );
-    return result.rows[0];
-}
-
-async function deleteSavingGoal(user, savingGoalId) {
-    const result = await db.query(
-        `
-        DELETE FROM public."savingGoals"
-        WHERE "goalID" = $1
-        RETURNING *;
-        `,
-        [
-            savingGoalId
-        ]
-    );
-
-    return result.rows[0];
-}
-
 
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
@@ -247,9 +187,5 @@ module.exports = {
     getUserByEmail,
     updateUserDetail,
     updateUserPreferences,
-    getUserPreferences,
-    getSavingGoal,
-    updateSavingGoal,
-    deleteSavingGoal,
-    createSavingGoal
+    getUserPreferences
 };
