@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/app_colors.dart';
 import '../screens/edit_username_screen.dart';
 
 class ProfileCard extends StatelessWidget {
@@ -20,25 +21,31 @@ class ProfileCard extends StatelessWidget {
       onTap: () async {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const EditUserDetailsScreen())
+          MaterialPageRoute(builder: (_) => const EditUserDetailsScreen()),
         );
       },
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F6FA),
-          borderRadius: BorderRadius.circular(16),
+          color: AppColors.light,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
         ),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: const Color(0xFF004D40),
+            Container(
+              width: 52,
+              height: 52,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Text(
                 userName.isNotEmpty ? userName[0].toUpperCase() : '?',
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
+                  color: AppColors.main,
+                  fontSize: 21,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -53,23 +60,23 @@ class ProfileCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E1E2D),
+                      color: AppColors.text,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     userEmail,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[500],
+                      color: AppColors.muted,
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(
-              Icons.chevron_right,
-              color: Colors.grey[400],
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.muted,
               size: 22,
             ),
           ],

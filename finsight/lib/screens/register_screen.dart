@@ -3,7 +3,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import './login_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:dotenv/dotenv.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -35,7 +34,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
-    if (email.isEmpty || username.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (email.isEmpty ||
+        username.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
       );
@@ -43,9 +45,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
     }
 
@@ -53,13 +55,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final response = await http.post(
         Uri.parse('${dotenv.env['BASE_URL']}/user/register'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'username': username, 'password': password}),
+        body: jsonEncode({
+          'email': email,
+          'username': username,
+          'password': password,
+        }),
       );
 
       if (response.statusCode == 201) {
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false,
         );
       } else {
         print('Status: ${response.statusCode}');
@@ -109,8 +116,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide.none,
             ),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
         ),
       ],
@@ -157,7 +166,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 controller: _uNameController,
                 hint: 'Enter your preferred username',
                 keyboardType: TextInputType.emailAddress,
-                suffixIcon: Icon(Icons.person_outlined, color: Colors.grey[400]),
+                suffixIcon: Icon(
+                  Icons.person_outlined,
+                  color: Colors.grey[400],
+                ),
               ),
               const SizedBox(height: 20),
 
@@ -188,7 +200,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 obscure: _obscureConfirmPassword,
                 suffixIcon: GestureDetector(
                   onTap: () => setState(
-                      () => _obscureConfirmPassword = !_obscureConfirmPassword),
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  ),
                   child: Icon(
                     _obscureConfirmPassword
                         ? Icons.visibility_off_outlined
@@ -205,7 +218,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: 54,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF004D40), Color(0xFF00897B), Color(0xFF4DB6AC)],
+                    colors: [
+                      Color(0xFF004D40),
+                      Color(0xFF00897B),
+                      Color(0xFF4DB6AC),
+                    ],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
                   ),
@@ -243,9 +260,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreen(),
+                        ),
                       );
                     },
                     child: const Text(
@@ -260,8 +279,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ],
               ),
               const SizedBox(height: 32),
-            ]
-          )
+            ],
+          ),
         ),
       ),
     );
