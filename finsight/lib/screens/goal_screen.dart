@@ -65,9 +65,6 @@ class _GoalScreenState extends State<GoalScreen> {
         },
       );
 
-      print('goal : ${response.statusCode}');
-      print('goal : ${response.body}');
-
       if (response.statusCode == 201 || response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
@@ -149,8 +146,6 @@ class _GoalScreenState extends State<GoalScreen> {
         body: jsonEncode(goal),
       );
 
-      print('goal : ${response.statusCode}');
-      print('goal : ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final created = jsonDecode(response.body);
@@ -186,9 +181,6 @@ class _GoalScreenState extends State<GoalScreen> {
         },
         body: jsonEncode(goal),
       );
-
-      print('goal : ${response.statusCode}');
-      print('goal : ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final updated = _tryDecode(response.body);
