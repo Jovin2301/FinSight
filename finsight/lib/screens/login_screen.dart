@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _login() async{
+  Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -40,9 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final response = await http.post(
         Uri.parse('${dotenv.env['BASE_URL']}/user/login'),
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
 
@@ -55,12 +53,12 @@ class _LoginScreenState extends State<LoginScreen> {
             data['token'],
             data['user'],
           );
-          Navigator.pushReplacement(
+          Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => const MainScreen()),
+            (route) => false,
           );
-        }
-        catch (e, stack) {
+        } catch (e, stack) {
           print('SETSESSION CRASHED: $e');
           print(stack);
         }
@@ -89,7 +87,11 @@ class _LoginScreenState extends State<LoginScreen> {
               padding: const EdgeInsets.only(top: 80, bottom: 40),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF004D40), Color(0xFF00897B), Color(0xFF4DB6AC)],
+                  colors: [
+                    Color(0xFF004D40),
+                    Color(0xFF00897B),
+                    Color(0xFF4DB6AC),
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -156,14 +158,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: InputDecoration(
                       hintText: 'Enter your email',
                       hintStyle: TextStyle(color: Colors.grey[400]),
-                      prefixIcon: Icon(Icons.email_outlined, color: Colors.grey[400]),
+                      prefixIcon: Icon(
+                        Icons.email_outlined,
+                        color: Colors.grey[400],
+                      ),
                       filled: true,
                       fillColor: const Color(0xFFF5F6FA),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -184,11 +192,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: InputDecoration(
                       hintText: 'Enter your password',
                       hintStyle: TextStyle(color: Colors.grey[400]),
-                      prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[400]),
+                      prefixIcon: Icon(
+                        Icons.lock_outline,
+                        color: Colors.grey[400],
+                      ),
                       suffixIcon: GestureDetector(
-                        onTap: () => setState(() => _obscurePassword = !_obscurePassword),
+                        onTap: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                         child: Icon(
-                          _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          _obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
                           color: Colors.grey[400],
                         ),
                       ),
@@ -198,7 +213,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(14),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -235,7 +253,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: const Text(
                         'Sign In',
-                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -249,7 +270,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           'or',
-                          style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                       Expanded(child: Divider(color: Colors.grey[300])),
@@ -269,7 +293,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                            MaterialPageRoute(
+                              builder: (context) => const RegisterScreen(),
+                            ),
                           );
                         },
                         child: const Text(
