@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'account_login_screen.dart';
-import 'financial_data_screen.dart';
+import 'account_topic_screen.dart';
+import 'financial_topic_screen.dart';
 import 'privacy_security_screen.dart';
 import 'app_feature_screen.dart';
 import 'trouble_shooting_screen.dart';
@@ -314,7 +314,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
   }
 }
 
-// ── Topic card ──────────────────────────────────────────────
+// ── Topic card 
 class _TopicCard extends StatelessWidget {
   final _TopicItem topic;
   const _TopicCard({required this.topic});
@@ -369,7 +369,7 @@ class _TopicCard extends StatelessWidget {
   }
 }
 
-// ── FAQ tile ─────────────────────────────────────────────────
+// ── FAQ tile 
 class _FAQTile extends StatefulWidget {
   final _FAQItem item;
   const _FAQTile({required this.item});
@@ -471,7 +471,7 @@ class _FAQTileState extends State<_FAQTile>
   }
 }
 
-// ── Data classes ──────────────────────────────────────────────
+// ── Data classes
 class _FAQItem {
   final String question;
   final String answer;
