@@ -55,6 +55,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           setState(() => _expenses[index] = expense);
         },
         onDeleteExpense: (index) => setState(() => _expenses.removeAt(index)),
+        unreadNotifications: 0,
+        onNotificationsTap: () {},
       ),
     ];
 
