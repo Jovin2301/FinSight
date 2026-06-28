@@ -101,25 +101,27 @@ class ExpenseCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF0F0),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: IconButton(
-                  tooltip: 'Delete transaction',
-                  onPressed: onDelete,
-                  padding: EdgeInsets.zero,
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: AppColors.red,
-                    size: 21,
+              if (onDelete != null) ...[
+                const SizedBox(width: 8),
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF0F0),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    tooltip: 'Delete transaction',
+                    onPressed: onDelete,
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppColors.red,
+                      size: 21,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

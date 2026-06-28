@@ -8,6 +8,7 @@ class BudgetCard extends StatelessWidget {
   final VoidCallback? onIconTap;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
+  final bool compact;
 
   const BudgetCard({
     super.key,
@@ -16,6 +17,7 @@ class BudgetCard extends StatelessWidget {
     this.onIconTap,
     this.onTap,
     this.onDelete,
+    this.compact = false,
   });
 
   @override
@@ -25,6 +27,104 @@ class BudgetCard extends StatelessWidget {
         : (spent / budget.limit).clamp(0.0, 1.0);
     final percentage = budget.limit == 0 ? 0 : (spent / budget.limit) * 100;
     final overBudget = spent > budget.limit;
+
+    if (compact) {
+      return Card(
+        margin: const EdgeInsets.only(bottom: 10),
+        elevation: 0,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.border),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.light,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        budget.icon,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            budget.category,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.text,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _frequencyLabel(budget.frequency),
+                            style: const TextStyle(
+                              color: AppColors.muted,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '\$${spent.toStringAsFixed(0)} / \$${budget.limit.toStringAsFixed(0)}',
+                          style: TextStyle(
+                            color: overBudget ? AppColors.red : AppColors.text,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${percentage.toStringAsFixed(0)}% used',
+                          style: TextStyle(
+                            color: overBudget ? AppColors.red : AppColors.muted,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 7,
+                    backgroundColor: AppColors.light,
+                    color: overBudget ? AppColors.red : AppColors.main,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 14),
@@ -105,24 +205,26 @@ class BudgetCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF0F0),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      onPressed: onDelete,
-                      padding: EdgeInsets.zero,
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        color: AppColors.red,
-                        size: 21,
+                  if (onDelete != null) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF0F0),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        onPressed: onDelete,
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: AppColors.red,
+                          size: 21,
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
               const SizedBox(height: 20),
@@ -187,5 +289,10 @@ class BudgetCard extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _frequencyLabel(String frequency) {
+    if (frequency.isEmpty) return 'Monthly';
+    return '${frequency[0].toUpperCase()}${frequency.substring(1)}';
   }
 }

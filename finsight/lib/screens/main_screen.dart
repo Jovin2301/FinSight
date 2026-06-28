@@ -28,7 +28,6 @@ class _MainScreenState extends State<MainScreen> {
   static const bool _previewBudgetPage = false;
 
   int _currentIndex = 0;
-  double _budget = 500.00;
   bool _loadingBudgets = false;
   List<String> _budgetCategories = [];
 
@@ -236,6 +235,10 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _goToTransactions() => setState(() => _currentIndex = 1);
+
+  void _goToBudgets() => setState(() => _currentIndex = 2);
+
+  void _goToGoals() => setState(() => _currentIndex = 3);
 
   int get _unreadNotifications {
     return _notifications.where((notification) => !notification.isRead).length;
@@ -599,10 +602,10 @@ class _MainScreenState extends State<MainScreen> {
         expenses: _expenses,
         budgets: _budgets,
         goals: _goals,
-        monthlyBudget: _budget,
         onAddExpense: _addExpense,
-        onBudgetChanged: (budget) => setState(() => _budget = budget),
         onViewTransactions: _goToTransactions,
+        onViewBudgets: _goToBudgets,
+        onViewGoals: _goToGoals,
         unreadNotifications: _unreadNotifications,
         onNotificationsTap: _openNotifications,
       ),

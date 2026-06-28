@@ -34,7 +34,7 @@ async function getTransactions(userId) {
                 ELSE c."catName"
             END AS category,
             t."transAmt" AS amount,
-            t."transDate" AS date,
+            TO_CHAR(t."transDate", 'YYYY-MM-DD') AS date,
             t."transPaymentMethod" AS "paymentMethod"
         FROM public."transactionHistory" t
         JOIN public."transactionCategory" c ON t."catID" = c."catID"
