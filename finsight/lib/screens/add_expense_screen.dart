@@ -77,7 +77,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       lastDate: DateTime.now(),
     );
 
-    if (picked != null) setState(() => _date = picked);
+    if (picked != null) {
+      setState(() => _date = DateTime(picked.year, picked.month, picked.day));
+    }
   }
 
   @override
