@@ -4,9 +4,17 @@ import 'package:http/http.dart' as http;
 import './auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../widgets/notification_bell.dart';
 
 class GoalScreen extends StatefulWidget {
-  const GoalScreen({super.key});
+  final int unreadNotifications;
+  final VoidCallback onNotificationsTap;
+
+  const GoalScreen({
+    super.key,
+    required this.unreadNotifications,
+    required this.onNotificationsTap,
+  });
 
   @override
   State<GoalScreen> createState() => _GoalScreenState();
@@ -297,8 +305,8 @@ class _GoalScreenState extends State<GoalScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 10),
             child: NotificationBell(
-              unreadCount: unreadNotifications,
-              onTap: onNotificationsTap,
+              unreadCount: widget.unreadNotifications,
+              onTap: widget.onNotificationsTap,
             ),
           ),
         ],
