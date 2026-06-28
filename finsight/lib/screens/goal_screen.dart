@@ -293,6 +293,15 @@ class _GoalScreenState extends State<GoalScreen> {
           style: TextStyle(color: _inkDark, fontSize: 18, fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: NotificationBell(
+              unreadCount: unreadNotifications,
+              onTap: onNotificationsTap,
+            ),
+          ),
+        ],
       ),
       floatingActionButton: GestureDetector(
         onTap: () => _openForm(context),

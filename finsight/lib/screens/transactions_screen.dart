@@ -1,21 +1,31 @@
+import 'dart:math' as math;
+
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/expense.dart';
 import '../widgets/expense_card.dart';
+import '../widgets/notification_bell.dart';
 import 'add_expense_screen.dart';
 
 class TransactionsScreen extends StatefulWidget {
   final List<Expense> expenses;
+  final Map<String, String> categoryIcons;
   final ValueChanged<Expense> onAddExpense;
   final void Function(int index, Expense expense) onUpdateExpense;
   final ValueChanged<int> onDeleteExpense;
+  final int unreadNotifications;
+  final VoidCallback onNotificationsTap;
 
   const TransactionsScreen({
     super.key,
     required this.expenses,
+    this.categoryIcons = const {},
     required this.onAddExpense,
     required this.onUpdateExpense,
     required this.onDeleteExpense,
+    required this.unreadNotifications,
+    required this.onNotificationsTap,
   });
 
   @override
@@ -27,12 +37,10 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   String _selectedDate = 'All';
 
   Future<void> _openForm(BuildContext context, [int? index]) async {
-    final expense = await Navigator.push<Expense>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AddExpenseScreen(
-          expense: index == null ? null : widget.expenses[index],
-        ),
+    final expense = await showDialog<Expense>(
+      context: context,
+      builder: (_) => AddExpenseScreen(
+        expense: index == null ? null : widget.expenses[index],
       ),
     );
 
@@ -180,6 +188,260 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
   }
 
+  String _monthLabel(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return months[date.month - 1];
+  }
+
+  List<DateTime> _recentMonths(DateTime now) {
+    return List.generate(6, (index) {
+      return DateTime(now.year, now.month - 5 + index);
+    });
+  }
+
+  Widget _chartContainer({
+    required String title,
+    required String subtitle,
+    required Widget child,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: AppColors.text,
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            subtitle,
+            style: const TextStyle(color: AppColors.muted, fontSize: 13),
+          ),
+          const SizedBox(height: 18),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _monthlySpendingChart(DateTime now) {
+    final months = _recentMonths(now);
+    final totals = <double>[];
+
+    for (final month in months) {
+      double total = 0;
+      for (final expense in widget.expenses) {
+        if (expense.date.year == month.year &&
+            expense.date.month == month.month) {
+          total += expense.amount;
+        }
+      }
+      totals.add(total);
+    }
+
+    final highest = totals.fold<double>(0, math.max);
+    if (highest == 0) {
+      return const SizedBox(
+        height: 180,
+        child: Center(
+          child: Text(
+            'No monthly spending yet',
+            style: TextStyle(color: AppColors.muted),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 190,
+      child: BarChart(
+        BarChartData(
+          maxY: highest * 1.2,
+          alignment: BarChartAlignment.spaceAround,
+          gridData: FlGridData(
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (_) =>
+                const FlLine(color: AppColors.border, strokeWidth: 1),
+          ),
+          borderData: FlBorderData(show: false),
+          titlesData: FlTitlesData(
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 28,
+                getTitlesWidget: (value, meta) {
+                  final index = value.toInt();
+                  if (index < 0 || index >= months.length) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      _monthLabel(months[index]),
+                      style: const TextStyle(
+                        color: AppColors.muted,
+                        fontSize: 12,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          barTouchData: BarTouchData(
+            touchTooltipData: BarTouchTooltipData(
+              getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                return BarTooltipItem(
+                  '\$${rod.toY.toStringAsFixed(2)}',
+                  const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                );
+              },
+            ),
+          ),
+          barGroups: List.generate(totals.length, (index) {
+            final isCurrentMonth = index == totals.length - 1;
+            return BarChartGroupData(
+              x: index,
+              barRods: [
+                BarChartRodData(
+                  toY: totals[index],
+                  width: 20,
+                  color: isCurrentMonth ? AppColors.main : AppColors.accent,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(6),
+                  ),
+                ),
+              ],
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  Widget _categorySpendingChart(DateTime now) {
+    final totals = <String, double>{};
+    for (final expense in widget.expenses) {
+      if (expense.date.year == now.year && expense.date.month == now.month) {
+        totals[expense.category] =
+            (totals[expense.category] ?? 0) + expense.amount;
+      }
+    }
+
+    if (totals.isEmpty) {
+      return const SizedBox(
+        height: 180,
+        child: Center(
+          child: Text(
+            'No spending this month',
+            style: TextStyle(color: AppColors.muted),
+          ),
+        ),
+      );
+    }
+
+    const colors = [
+      AppColors.main,
+      Color(0xFFEF8A78),
+      Color(0xFFF2B84B),
+      Color(0xFF5B8DEF),
+      Color(0xFF8C7BC8),
+    ];
+    final entries = totals.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+    final total = entries.fold<double>(0, (sum, entry) => sum + entry.value);
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 170,
+          child: PieChart(
+            PieChartData(
+              centerSpaceRadius: 38,
+              sectionsSpace: 3,
+              sections: List.generate(entries.length, (index) {
+                final percentage = entries[index].value / total * 100;
+                return PieChartSectionData(
+                  value: entries[index].value,
+                  color: colors[index % colors.length],
+                  radius: 46,
+                  title: percentage >= 8
+                      ? '${percentage.toStringAsFixed(0)}%'
+                      : '',
+                  titleStyle: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        Wrap(
+          spacing: 14,
+          runSpacing: 8,
+          children: List.generate(entries.length, (index) {
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 9,
+                  height: 9,
+                  decoration: BoxDecoration(
+                    color: colors[index % colors.length],
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  entries[index].key,
+                  style: const TextStyle(color: AppColors.muted, fontSize: 12),
+                ),
+              ],
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final categories = <String>[];
@@ -234,140 +496,198 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: const Text('Transactions')),
+      appBar: AppBar(
+        title: const Text('Transactions'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: NotificationBell(
+              unreadCount: widget.unreadNotifications,
+              onTap: widget.onNotificationsTap,
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'addTrans',
         onPressed: () => _openForm(context),
         child: const Icon(Icons.add),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.dark, AppColors.main, AppColors.accent],
-                ),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Total Spent',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '\$${total.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 90),
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.light,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.border),
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Row(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Recent Expenses',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${results.length} items',
-                      style: const TextStyle(color: AppColors.muted),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  onPressed: () => _openFilters(categories, dateFilters),
-                  icon: Badge(
-                    isLabelVisible: hasFilters,
-                    label: Text('$filterCount'),
-                    child: const Icon(Icons.filter_alt_rounded),
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  color: hasFilters ? AppColors.main : AppColors.muted,
+                  child: const Icon(
+                    Icons.payments_outlined,
+                    color: AppColors.main,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        hasFilters ? 'Filtered Spending' : 'Total Spent',
+                        style: const TextStyle(color: AppColors.muted),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '\$${total.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          color: AppColors.text,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  '${results.length} items',
+                  style: const TextStyle(color: AppColors.muted),
                 ),
               ],
             ),
-            if (hasFilters) ...[
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ...shownSelectedCategories.map((category) {
-                      return Chip(
-                        label: Text(category),
-                        onDeleted: () {
-                          setState(() {
-                            _selectedCategories.remove(category);
-                          });
-                        },
-                      );
-                    }),
-                    if (_selectedDate != 'All')
-                      Chip(
-                        label: Text(_selectedDate),
-                        onDeleted: () {
-                          setState(() => _selectedDate = 'All');
-                        },
-                      ),
-                  ],
+          ),
+          const SizedBox(height: 20),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= 760;
+              final chartWidth = wide
+                  ? (constraints.maxWidth - 14) / 2
+                  : constraints.maxWidth;
+
+              return Wrap(
+                spacing: 14,
+                runSpacing: 14,
+                children: [
+                  SizedBox(
+                    width: chartWidth,
+                    child: _chartContainer(
+                      title: 'Monthly Spending',
+                      subtitle: 'Last 6 months',
+                      child: _monthlySpendingChart(now),
+                    ),
+                  ),
+                  SizedBox(
+                    width: chartWidth,
+                    child: _chartContainer(
+                      title: 'Spending by Category',
+                      subtitle: '${_monthLabel(now)} ${now.year}',
+                      child: _categorySpendingChart(now),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Recent Expenses',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${results.length} items',
+                    style: const TextStyle(color: AppColors.muted),
+                  ),
+                ],
+              ),
+              IconButton(
+                tooltip: 'Filter transactions',
+                onPressed: () => _openFilters(categories, dateFilters),
+                icon: Badge(
+                  isLabelVisible: hasFilters,
+                  label: Text('$filterCount'),
+                  child: const Icon(Icons.filter_alt_rounded),
                 ),
+                color: hasFilters ? AppColors.main : AppColors.muted,
               ),
             ],
-            const SizedBox(height: 12),
-            Expanded(
-              child: widget.expenses.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No transactions yet.\nTap + to add your first expense.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.muted),
-                      ),
-                    )
-                  : results.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No transactions match the selected filters.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: AppColors.muted),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: results.length,
-                      itemBuilder: (_, index) {
-                        final originalIndex = results[index].key;
-                        final expense = results[index].value;
-
-                        return ExpenseCard(
-                          expense: expense,
-                          onTap: () => _openForm(context, originalIndex),
-                          onDelete: () =>
-                              _confirmDelete(context, originalIndex),
-                        );
-                      },
-                    ),
+          ),
+          if (hasFilters) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ...shownSelectedCategories.map((category) {
+                  return Chip(
+                    label: Text(category),
+                    onDeleted: () {
+                      setState(() => _selectedCategories.remove(category));
+                    },
+                  );
+                }),
+                if (_selectedDate != 'All')
+                  Chip(
+                    label: Text(_selectedDate),
+                    onDeleted: () {
+                      setState(() => _selectedDate = 'All');
+                    },
+                  ),
+              ],
             ),
           ],
-        ),
+          const SizedBox(height: 12),
+          if (widget.expenses.isEmpty)
+            const SizedBox(
+              height: 160,
+              child: Center(
+                child: Text(
+                  'No transactions yet.\nTap + to add your first expense.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.muted),
+                ),
+              ),
+            )
+          else if (results.isEmpty)
+            const SizedBox(
+              height: 160,
+              child: Center(
+                child: Text(
+                  'No transactions match the selected filters.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.muted),
+                ),
+              ),
+            )
+          else
+            ...results.map((entry) {
+              final originalIndex = entry.key;
+              final expense = entry.value;
+
+              return ExpenseCard(
+                expense: expense,
+                categoryIcon: widget.categoryIcons[expense.category],
+                onTap: () => _openForm(context, originalIndex),
+                onDelete: () => _confirmDelete(context, originalIndex),
+              );
+            }),
+        ],
       ),
     );
   }

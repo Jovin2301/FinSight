@@ -30,9 +30,9 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Future<void> _addExpense(BuildContext context) async {
-    final expense = await Navigator.push<Expense>(
-      context,
-      MaterialPageRoute(builder: (_) => const AddExpenseScreen()),
+    final expense = await showDialog<Expense>(
+      context: context,
+      builder: (_) => const AddExpenseScreen(),
     );
     if (expense != null) onAddExpense(expense);
   }
