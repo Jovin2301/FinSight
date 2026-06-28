@@ -631,11 +631,11 @@ class _MainScreenState extends State<MainScreen> {
         onUpdateBudget: _updateBudget,
         onDeleteBudget: _deleteBudget,
       ),
+      // Goals
       GoalScreen(
         unreadNotifications: _unreadNotifications,
         onNotificationsTap: _openNotifications,
       ),
-      // Goals
       // Profile
       ProfileScreen(
         unreadNotifications: _unreadNotifications,
