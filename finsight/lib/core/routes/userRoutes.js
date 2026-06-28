@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const { getUserByEmail, authMiddleware, loginUser, updateUserDetail, updateUserPreferences, getUserPreferences } = require('../service/userService');
+const { getUserByEmail, authMiddleware, loginUser, updateUserDetail, updateUserPreferences, getUserPreferences, getSavingGoal, updateSavingGoal, deleteSavingGoal, createSavingGoal } = require('../service/userService');
 const userService = require('../service/userService');
 
 //update user preferences
@@ -25,49 +25,57 @@ router.get('/getUserPreferences', authMiddleware, async (req, res) => {
     }
 });
 
-
-
-
-router.get('/:id', authMiddleware, async (req, res) => {
-    console.log('ID received:', req.params.id);
-
+router.get('/getSavingGoal', authMiddleware, async (req, res) => {
     try {
-        const user = await userService.getUserById(req.params.id);
-        console.log('User found:', user);
-
-        res.json(user);
+        const savingGoals = await userService.getSavingGoal({ userid : req.userId });
+        res.status(201).json(savingGoals);
     } catch (err) {
-        console.error(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.put('/updateSavingGoal/:id', authMiddleware, async (req, res) => {
+    try {
+        console.log('userId:', req.userId, 'goalId param:', req.params.id, 'body:', req.body);
+        const updatedGoal = await userService.updateSavingGoal(
+            { userid: req.userId },
+            req.params.id,
+            req.body
+        );
+        console.log('updatedGoal:', updatedGoal);
+        res.status(200).json(updatedGoal);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.put('/createSavingGoal', authMiddleware, async (req, res) => {
+    try {
+        const savingGoals = await userService.createSavingGoal(
+            { userid : req.userId }, 
+            req.body
+        );
+        res.status(201).json(savingGoals);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+router.delete("/deleteSavingGoals/:goalId", authMiddleware, async (req, res) => {
+    try {
+        const deleted = await userService.deleteSavingGoal(
+            { userid: req.userId },
+            req.params.goalId
+        );
+
+        res.json(deleted);
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
 // User login logic - 'localhost/user/login'
-/*router.post('/login', authMiddleware, async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await getUserByEmail(email);
-
-        if (!user) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
-
-        const passwordMatches = await bcrypt.compare(password, user.userPassword); 
-
-        if (!passwordMatches) {
-            return res.status(401).json({ error: 'Invalid email or password' });
-        }
-
-        res.json({
-            userID: user.userID,
-            userName: user.userName,
-            userEmail: user.userEmail
-        });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});*/
-
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
