@@ -63,20 +63,22 @@ class _MainScreenState extends State<MainScreen> {
         ]
       : [];
 
-  final List<Goal> _goals = [
-    const Goal(
-      id: '1',
-      title: 'Emergency Fund',
-      targetAmount: 1000,
-      savedAmount: 250,
-    ),
-    const Goal(
-      id: '2',
-      title: 'New Laptop',
-      targetAmount: 2000,
-      savedAmount: 600,
-    ),
-  ];
+  final List<Goal> _goals = [];
+
+  // final List<Goal> _goals = [
+  //   const Goal(
+  //     id: '1',
+  //     title: 'Emergency Fund',
+  //     targetAmount: 1000,
+  //     savedAmount: 250,
+  //   ),
+  //   const Goal(
+  //     id: '2',
+  //     title: 'New Laptop',
+  //     targetAmount: 2000,
+  //     savedAmount: 600,
+  //   ),
+  // ];
 
   List<AppNotification> _notifications = _previewBudgetPage
       ? [
@@ -472,12 +474,28 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void _addGoal(Goal goal) => setState(() => _goals.add(goal));
 
-  void _updateGoal(int index, Goal goal) =>
-      setState(() => _goals[index] = goal);
+  Future<void> _loadGoals() async {
+    if (context.read<AuthProvider>().token == null) return;
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['BASE_URL']}/user/getSavingGoal'),
+        headers: _headers(),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List;
+        if (!mounted) return;
+        setState(() {
+            _goals
+            ..clear()
+            ..addAll(data.map((item) => Goal.fromJson(item)));
+        });
+      }
+    } catch (e) {
+      _showMessage('Could not load goals');
+    }
+  }
 
-  void _deleteGoal(int index) => setState(() => _goals.removeAt(index));
 
   void _addBudget(Budget budget) async {
     if (_previewBudgetPage) {

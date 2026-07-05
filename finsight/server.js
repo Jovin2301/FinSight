@@ -7,16 +7,16 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const userRoutes = require('../lib/core/routes/userRoutes');
+const userRoutes = require('./lib/core/routes/userRoutes');
 app.use('/user', userRoutes);
 
-const budgetRoutes = require('../lib/core/routes/budgetRoutes');
+const budgetRoutes = require('./lib/core/routes/budgetRoutes');
 app.use('/budget', budgetRoutes);
 
-const notificationRoutes = require('../lib/core/routes/notificationRoutes');
+const notificationRoutes = require('./lib/core/routes/notificationRoutes');
 app.use('/notification', notificationRoutes);
 
-const transactionRoutes = require('../lib/core/routes/transactionRoutes');
+const transactionRoutes = require('./lib/core/routes/transactionRoutes');
 app.use('/transaction', transactionRoutes);
 
 app.listen(PORT, () => {

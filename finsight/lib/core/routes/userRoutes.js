@@ -87,7 +87,8 @@ router.post('/login', async (req, res) => {
 });
 
 // creating / registering user
-router.post('/register', authMiddleware, async (req, res) => {
+router.post('/register', async (req, res) => {
+    console.log('!!!! REGISTER HANDLER HIT !!!!');
     console.log('body', req.body);
     try {
         const user = await userService.registerUser(req.body);
