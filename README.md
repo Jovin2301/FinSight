@@ -1,6 +1,6 @@
 # 💰 FinSight (Apollo 11)
 
-Try the app here: https://finsight-nusorbital.vercel.app/
+Try the app here: https://finsight2-orbitalnus.vercel.app/
 
 > **Track smarter. Budget better.**
 
