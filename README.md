@@ -1,5 +1,7 @@
 # 💰 FinSight (Apollo 11)
 
+Try the app here: https://finsight-nusorbital.vercel.app/
+
 > **Track smarter. Budget better.**
 
 FinSight is a personal finance application designed to help students and young adults take control of their spending. It allows users to record daily expenses, monitor category budgets, track saving goals, receive budget alerts, and visualise spending habits through an interactive dashboard — all in one place.
