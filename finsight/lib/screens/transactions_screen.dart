@@ -856,10 +856,11 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
 
     final amount = _findAmount(text);
     final date = _findDate(text);
+    final merchant = _findMerchant(lines);
 
     setState(() {
-      if (lines.isNotEmpty) {
-        _merchant.text = lines.first;
+      if (merchant != null) {
+        _merchant.text = merchant;
       }
       if (amount != null) {
         _amount.text = amount.toStringAsFixed(2);
@@ -871,7 +872,51 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
     });
   }
 
+  String? _findMerchant(List<String> lines) {
+    final ignoredWords = [
+      'receipt',
+      'invoice',
+      'date',
+      'time',
+      'gst',
+      'tax',
+      'total',
+      'amount',
+      'cashier',
+      'change',
+      'payment',
+    ];
+
+    for (final line in lines.take(6)) {
+      final lowerLine = line.toLowerCase();
+      final hasNumber = RegExp(r'\d').hasMatch(line);
+      final shouldIgnore = ignoredWords.any(lowerLine.contains);
+
+      if (!hasNumber && !shouldIgnore && line.length >= 3) {
+        return line;
+      }
+    }
+
+    return lines.isEmpty ? null : lines.first;
+  }
+
   double? _findAmount(String text) {
+    final lines = text.split('\n').map((line) => line.trim()).toList();
+    final totalWords = ['grand total', 'net total', 'total', 'amount due'];
+
+    for (final line in lines.reversed) {
+      final lowerLine = line.toLowerCase();
+      final isTotalLine = totalWords.any(lowerLine.contains);
+      if (!isTotalLine) continue;
+
+      final lineAmount = _lastAmountInText(line);
+      if (lineAmount != null) return lineAmount;
+    }
+
+    return _lastAmountInText(text);
+  }
+
+  double? _lastAmountInText(String text) {
     final matches = RegExp(r'(\d+\.\d{2})').allMatches(text).toList();
     if (matches.isEmpty) return null;
 
@@ -879,39 +924,61 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
   }
 
   DateTime? _findDate(String text) {
-    final match = RegExp(
-      r'(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})',
-    ).firstMatch(text);
-    if (match == null) return null;
+    final dayFirst = RegExp(r'(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})')
+        .firstMatch(text);
+    if (dayFirst != null) {
+      final day = int.tryParse(dayFirst.group(1)!);
+      final month = int.tryParse(dayFirst.group(2)!);
+      final year = int.tryParse(dayFirst.group(3)!);
+      if (day != null && month != null && year != null) {
+        return DateTime(year, month, day);
+      }
+    }
 
-    final day = int.tryParse(match.group(1)!);
-    final month = int.tryParse(match.group(2)!);
-    final year = int.tryParse(match.group(3)!);
-    if (day == null || month == null || year == null) return null;
+    final yearFirst = RegExp(r'(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})')
+        .firstMatch(text);
+    if (yearFirst != null) {
+      final year = int.tryParse(yearFirst.group(1)!);
+      final month = int.tryParse(yearFirst.group(2)!);
+      final day = int.tryParse(yearFirst.group(3)!);
+      if (day != null && month != null && year != null) {
+        return DateTime(year, month, day);
+      }
+    }
 
-    return DateTime(year, month, day);
+    return null;
   }
 
   String _guessCategory(String text) {
     final receiptText = text.toLowerCase();
 
     if (receiptText.contains('mrt') ||
+        receiptText.contains('bus') ||
         receiptText.contains('grab') ||
-        receiptText.contains('taxi')) {
+        receiptText.contains('gojek') ||
+        receiptText.contains('taxi') ||
+        receiptText.contains('ez-link')) {
       return 'Transport';
     }
     if (receiptText.contains('uniqlo') ||
+        receiptText.contains('lazada') ||
+        receiptText.contains('watsons') ||
         receiptText.contains('shopee') ||
         receiptText.contains('shopping')) {
       return 'Shopping';
     }
     if (receiptText.contains('bill') ||
         receiptText.contains('singtel') ||
+        receiptText.contains('starhub') ||
+        receiptText.contains('sp services') ||
         receiptText.contains('utilities')) {
       return 'Bills';
     }
     if (receiptText.contains('fairprice') ||
+        receiptText.contains('ntuc') ||
         receiptText.contains('food') ||
+        receiptText.contains('restaurant') ||
+        receiptText.contains('mcdonald') ||
         receiptText.contains('cafe')) {
       return 'Food';
     }
