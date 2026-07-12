@@ -13,6 +13,7 @@
 migrate_working_dir/
 .env
 node_modules
+eng.traineddata
 # IntelliJ related
 *.iml
 *.ipr

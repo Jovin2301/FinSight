@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import '../constants/app_colors.dart';
 import '../models/expense.dart';
@@ -737,8 +740,8 @@ class ReceiptScanDialog extends StatefulWidget {
 }
 
 class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
-  final _merchant = TextEditingController(text: 'FairPrice Finest');
-  final _amount = TextEditingController(text: '18.90');
+  final _merchant = TextEditingController();
+  final _amount = TextEditingController();
   final _categories = ['Food', 'Transport', 'Shopping', 'Bills', 'Others'];
   final _paymentMethods = ['Cash', 'Credit Card', 'Bank Transfer', 'EZ-Link'];
 
@@ -814,13 +817,13 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
       _paymentMethod = 'Cash';
       _scanStatus = _canUseCamera
           ? 'Reading receipt text...'
-          : 'Sample receipt text extracted';
+          : 'Reading receipt text from server...';
     });
 
     if (_canUseCamera) {
       await _readReceiptText(pickedImage.path);
     } else {
-      _fillFromReceiptText(_sampleReceiptText);
+      await _readReceiptTextFromServer(imageBytes, pickedImage.name);
     }
   }
 
@@ -837,13 +840,58 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
         return;
       }
 
+      debugPrint('Receipt OCR text:\n$receiptText');
       _fillFromReceiptText(receiptText);
       setState(() => _scanStatus = 'Receipt text extracted');
-    } catch (_) {
-      _fillFromReceiptText(_sampleReceiptText);
-      setState(() => _scanStatus = 'Used sample details for preview');
+    } catch (error) {
+      debugPrint('Mobile receipt scan error: $error');
+      setState(() => _scanStatus = 'Could not read receipt. Try a clearer image.');
     } finally {
       await textRecognizer.close();
+    }
+  }
+
+  Future<void> _readReceiptTextFromServer(
+    Uint8List imageBytes,
+    String fileName,
+  ) async {
+    try {
+      final baseUrl = dotenv.env['BASE_URL'] ?? 'http://127.0.0.1:3000';
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('$baseUrl/receipt/scan'),
+      );
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'receipt',
+          imageBytes,
+          filename: fileName,
+        ),
+      );
+
+      final response = await request.send();
+      final body = await response.stream.bytesToString();
+
+      if (response.statusCode != 200) {
+        debugPrint('Desktop receipt scan failed: $body');
+        setState(() => _scanStatus = 'Could not scan receipt. Try a clearer image.');
+        return;
+      }
+
+      final receiptText = (jsonDecode(body)['text'] as String?)?.trim();
+
+      if (receiptText == null || receiptText.isEmpty) {
+        setState(() => _scanStatus = 'Could not read the receipt clearly');
+        return;
+      }
+
+      debugPrint('Receipt OCR text:\n$receiptText');
+      _fillFromReceiptText(receiptText);
+      setState(() => _scanStatus = 'Receipt text extracted');
+    } catch (error) {
+      debugPrint('Desktop receipt scan error: $error');
+      setState(() => _scanStatus = 'Start the server to scan receipts.');
     }
   }
 
@@ -857,6 +905,10 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
     final amount = _findAmount(text);
     final date = _findDate(text);
     final merchant = _findMerchant(lines);
+    final paymentMethod = _findPaymentMethod(text);
+    debugPrint(
+      'Receipt parsed: merchant=$merchant amount=$amount date=$date category=${_guessCategory(text)} payment=$paymentMethod',
+    );
 
     setState(() {
       if (merchant != null) {
@@ -869,10 +921,30 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
         _date = date;
       }
       _category = _guessCategory(text);
+      _paymentMethod = paymentMethod;
     });
   }
 
   String? _findMerchant(List<String> lines) {
+    final knownStores = [
+      'fairprice',
+      'ntuc',
+      'cold storage',
+      'sheng siong',
+      'giant',
+      'toast box',
+      'starbucks',
+      'mcdonald',
+      'kfc',
+      'subway',
+      'watsons',
+      'guardian',
+      'uniqlo',
+      'shopee',
+      'lazada',
+      'grab',
+      'comfortdelgro',
+    ];
     final ignoredWords = [
       'receipt',
       'invoice',
@@ -885,29 +957,69 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
       'cashier',
       'change',
       'payment',
+      'visa',
+      'mastercard',
+      'subtotal',
+      'balance',
+      'approval',
+      'terminal',
+      'merchant id',
+      'transaction',
+      'uen',
+      'tel',
+      'address',
     ];
 
-    for (final line in lines.take(6)) {
+    for (final line in lines.take(10)) {
       final lowerLine = line.toLowerCase();
-      final hasNumber = RegExp(r'\d').hasMatch(line);
-      final shouldIgnore = ignoredWords.any(lowerLine.contains);
+      final hasStoreName = knownStores.any(lowerLine.contains);
 
-      if (!hasNumber && !shouldIgnore && line.length >= 3) {
-        return line;
+      if (hasStoreName) {
+        return _cleanMerchantLine(line);
       }
     }
 
-    return lines.isEmpty ? null : lines.first;
+    for (final line in lines.take(10)) {
+      final lowerLine = line.toLowerCase();
+      final hasNumber = RegExp(r'\d').hasMatch(line);
+      final hasAmount = RegExp(r'\d+\.\d{2}').hasMatch(line);
+      final hasDate = RegExp(r'\d{1,4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,4}')
+          .hasMatch(line);
+      final shouldIgnore = ignoredWords.any(lowerLine.contains);
+      final tooShort = line.replaceAll(RegExp(r'[^A-Za-z]'), '').length < 3;
+
+      if (!hasNumber && !hasAmount && !hasDate && !shouldIgnore && !tooShort) {
+        return _cleanMerchantLine(line);
+      }
+    }
+
+    return lines.isEmpty ? null : _cleanMerchantLine(lines.first);
+  }
+
+  String _cleanMerchantLine(String line) {
+    return line
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .replaceAll(RegExp(r'^[^A-Za-z]+'), '')
+        .replaceAll(RegExp(r"[^A-Za-z0-9 &.'-]+$"), '')
+        .trim();
   }
 
   double? _findAmount(String text) {
     final lines = text.split('\n').map((line) => line.trim()).toList();
-    final totalWords = ['grand total', 'net total', 'total', 'amount due'];
+    final totalWords = [
+      'grand total',
+      'net total',
+      'amount due',
+      'total due',
+      'total',
+    ];
+    final skipWords = ['subtotal', 'sub total', 'change', 'cash', 'balance'];
 
     for (final line in lines.reversed) {
       final lowerLine = line.toLowerCase();
       final isTotalLine = totalWords.any(lowerLine.contains);
-      if (!isTotalLine) continue;
+      final shouldSkip = skipWords.any(lowerLine.contains);
+      if (!isTotalLine || shouldSkip) continue;
 
       final lineAmount = _lastAmountInText(line);
       if (lineAmount != null) return lineAmount;
@@ -917,25 +1029,28 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
   }
 
   double? _lastAmountInText(String text) {
-    final matches = RegExp(r'(\d+\.\d{2})').allMatches(text).toList();
+    final matches = RegExp(r'(?:\$|sgd|s\$)?\s*(\d{1,4}(?:,\d{3})*\.\d{2})',
+            caseSensitive: false)
+        .allMatches(text)
+        .toList();
     if (matches.isEmpty) return null;
 
-    return double.tryParse(matches.last.group(1)!);
+    return double.tryParse(matches.last.group(1)!.replaceAll(',', ''));
   }
 
   DateTime? _findDate(String text) {
-    final dayFirst = RegExp(r'(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})')
+    final dayFirst = RegExp(r'(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})')
         .firstMatch(text);
     if (dayFirst != null) {
       final day = int.tryParse(dayFirst.group(1)!);
       final month = int.tryParse(dayFirst.group(2)!);
-      final year = int.tryParse(dayFirst.group(3)!);
+      final year = _normalYear(dayFirst.group(3)!);
       if (day != null && month != null && year != null) {
         return DateTime(year, month, day);
       }
     }
 
-    final yearFirst = RegExp(r'(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})')
+    final yearFirst = RegExp(r'(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})')
         .firstMatch(text);
     if (yearFirst != null) {
       final year = int.tryParse(yearFirst.group(1)!);
@@ -947,6 +1062,14 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
     }
 
     return null;
+  }
+
+  int? _normalYear(String text) {
+    final year = int.tryParse(text);
+    if (year == null) return null;
+    if (text.length == 2) return 2000 + year;
+
+    return year;
   }
 
   String _guessCategory(String text) {
@@ -984,6 +1107,45 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
     }
 
     return 'Others';
+  }
+
+  String _findPaymentMethod(String text) {
+    final receiptText = text.toLowerCase();
+
+    if (receiptText.contains('ez-link') || receiptText.contains('ezlink')) {
+      return 'EZ-Link';
+    }
+    if (receiptText.contains('paynow') ||
+        receiptText.contains('pay now') ||
+        receiptText.contains('paylah') ||
+        receiptText.contains('pay lah') ||
+        receiptText.contains('dbs') ||
+        receiptText.contains('uob') ||
+        receiptText.contains('ocbc') ||
+        receiptText.contains('posb') ||
+        receiptText.contains('bank account') ||
+        receiptText.contains('bank transfer') ||
+        receiptText.contains('fund transfer') ||
+        receiptText.contains('savings account') ||
+        receiptText.contains('saving account') ||
+        receiptText.contains('current account')) {
+      return 'Bank Transfer';
+    }
+    if (receiptText.contains('visa') ||
+        receiptText.contains('mastercard') ||
+        receiptText.contains('master card') ||
+        receiptText.contains('credit card') ||
+        receiptText.contains('debit card') ||
+        RegExp(r'\bcard\b').hasMatch(receiptText)) {
+      return 'Credit Card';
+    }
+    if (receiptText.contains('cash tendered') ||
+        receiptText.contains('cash paid') ||
+        RegExp(r'\bcash\b').hasMatch(receiptText)) {
+      return 'Cash';
+    }
+
+    return _paymentMethod;
   }
 
   @override
@@ -1350,13 +1512,3 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
     );
   }
 }
-
-const _sampleReceiptText = '''
-FairPrice Finest
-Receipt No: 10293
-Date: 27/06/2026
-Milk 4.80
-Bread 2.90
-Snacks 5.20
-Total 18.90
-''';
