@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image_picker/image_picker.dart';
 import '../constants/app_colors.dart';
 import '../models/expense.dart';
@@ -811,9 +812,39 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
     setState(() {
       _receiptImage = imageBytes;
       _paymentMethod = 'Cash';
-      _scanStatus = 'Sample receipt text extracted';
+      _scanStatus = _canUseCamera
+          ? 'Reading receipt text...'
+          : 'Sample receipt text extracted';
     });
-    _fillFromReceiptText(_sampleReceiptText);
+
+    if (_canUseCamera) {
+      await _readReceiptText(pickedImage.path);
+    } else {
+      _fillFromReceiptText(_sampleReceiptText);
+    }
+  }
+
+  Future<void> _readReceiptText(String imagePath) async {
+    final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+
+    try {
+      final inputImage = InputImage.fromFilePath(imagePath);
+      final result = await textRecognizer.processImage(inputImage);
+      final receiptText = result.text.trim();
+
+      if (receiptText.isEmpty) {
+        setState(() => _scanStatus = 'Could not read the receipt clearly');
+        return;
+      }
+
+      _fillFromReceiptText(receiptText);
+      setState(() => _scanStatus = 'Receipt text extracted');
+    } catch (_) {
+      _fillFromReceiptText(_sampleReceiptText);
+      setState(() => _scanStatus = 'Used sample details for preview');
+    } finally {
+      await textRecognizer.close();
+    }
   }
 
   void _fillFromReceiptText(String text) {
