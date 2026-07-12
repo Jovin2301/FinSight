@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../constants/app_colors.dart';
 import '../models/expense.dart';
 import '../widgets/expense_card.dart';
@@ -48,6 +50,17 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     index == null
         ? widget.onAddExpense(expense)
         : widget.onUpdateExpense(index, expense);
+  }
+
+  Future<void> _openReceiptScan() async {
+    final expense = await showDialog<Expense>(
+      context: context,
+      builder: (_) => const ReceiptScanDialog(),
+    );
+
+    if (expense != null) {
+      widget.onAddExpense(expense);
+    }
   }
 
   Future<void> _confirmDelete(BuildContext context, int index) async {
@@ -510,6 +523,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'addTrans',
+        tooltip: 'Add transaction',
         onPressed: () => _openForm(context),
         child: const Icon(Icons.add),
       ),
@@ -616,15 +630,36 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   ),
                 ],
               ),
-              IconButton(
-                tooltip: 'Filter transactions',
-                onPressed: () => _openFilters(categories, dateFilters),
-                icon: Badge(
-                  isLabelVisible: hasFilters,
-                  label: Text('$filterCount'),
-                  child: const Icon(Icons.filter_alt_rounded),
-                ),
-                color: hasFilters ? AppColors.main : AppColors.muted,
+              Row(
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _openReceiptScan,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.main,
+                      side: const BorderSide(color: AppColors.border),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    icon: const Icon(Icons.document_scanner_outlined, size: 18),
+                    label: const Text('Scan'),
+                  ),
+                  const SizedBox(width: 6),
+                  IconButton(
+                    tooltip: 'Filter transactions',
+                    onPressed: () => _openFilters(categories, dateFilters),
+                    icon: Badge(
+                      isLabelVisible: hasFilters,
+                      label: Text('$filterCount'),
+                      child: const Icon(Icons.filter_alt_rounded),
+                    ),
+                    color: hasFilters ? AppColors.main : AppColors.muted,
+                  ),
+                ],
               ),
             ],
           ),
@@ -692,3 +727,538 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
   }
 }
+
+class ReceiptScanDialog extends StatefulWidget {
+  const ReceiptScanDialog({super.key});
+
+  @override
+  State<ReceiptScanDialog> createState() => _ReceiptScanDialogState();
+}
+
+class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
+  final _merchant = TextEditingController(text: 'FairPrice Finest');
+  final _amount = TextEditingController(text: '18.90');
+  final _categories = ['Food', 'Transport', 'Shopping', 'Bills', 'Others'];
+  final _paymentMethods = ['Cash', 'Credit Card', 'Bank Transfer', 'EZ-Link'];
+
+  Uint8List? _receiptImage;
+  String _scanStatus = 'Pick a receipt first';
+  String _category = 'Food';
+  String _paymentMethod = 'Cash';
+  DateTime _date = DateTime.now();
+
+  bool get _canUseCamera {
+    return !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS);
+  }
+
+  @override
+  void dispose() {
+    _merchant.dispose();
+    _amount.dispose();
+    super.dispose();
+  }
+
+  void _saveScannedReceipt() {
+    final merchant = _merchant.text.trim();
+    final amount = double.tryParse(_amount.text.trim());
+
+    if (merchant.isEmpty || amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Check the scanned receipt details.')),
+      );
+      return;
+    }
+
+    Navigator.pop(
+      context,
+      Expense(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        title: merchant,
+        category: _category,
+        amount: amount,
+        date: _date,
+        paymentMethod: _paymentMethod,
+      ),
+    );
+  }
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      setState(() => _date = DateTime(picked.year, picked.month, picked.day));
+    }
+  }
+
+  Future<void> _pickReceiptImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(
+      source: source,
+      imageQuality: 80,
+      maxWidth: 1200,
+    );
+
+    if (pickedImage == null) return;
+
+    final imageBytes = await pickedImage.readAsBytes();
+    setState(() {
+      _receiptImage = imageBytes;
+      _paymentMethod = 'Cash';
+      _scanStatus = 'Sample receipt text extracted';
+    });
+    _fillFromReceiptText(_sampleReceiptText);
+  }
+
+  void _fillFromReceiptText(String text) {
+    final lines = text
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
+
+    final amount = _findAmount(text);
+    final date = _findDate(text);
+
+    setState(() {
+      if (lines.isNotEmpty) {
+        _merchant.text = lines.first;
+      }
+      if (amount != null) {
+        _amount.text = amount.toStringAsFixed(2);
+      }
+      if (date != null) {
+        _date = date;
+      }
+      _category = _guessCategory(text);
+    });
+  }
+
+  double? _findAmount(String text) {
+    final matches = RegExp(r'(\d+\.\d{2})').allMatches(text).toList();
+    if (matches.isEmpty) return null;
+
+    return double.tryParse(matches.last.group(1)!);
+  }
+
+  DateTime? _findDate(String text) {
+    final match = RegExp(
+      r'(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})',
+    ).firstMatch(text);
+    if (match == null) return null;
+
+    final day = int.tryParse(match.group(1)!);
+    final month = int.tryParse(match.group(2)!);
+    final year = int.tryParse(match.group(3)!);
+    if (day == null || month == null || year == null) return null;
+
+    return DateTime(year, month, day);
+  }
+
+  String _guessCategory(String text) {
+    final receiptText = text.toLowerCase();
+
+    if (receiptText.contains('mrt') ||
+        receiptText.contains('grab') ||
+        receiptText.contains('taxi')) {
+      return 'Transport';
+    }
+    if (receiptText.contains('uniqlo') ||
+        receiptText.contains('shopee') ||
+        receiptText.contains('shopping')) {
+      return 'Shopping';
+    }
+    if (receiptText.contains('bill') ||
+        receiptText.contains('singtel') ||
+        receiptText.contains('utilities')) {
+      return 'Bills';
+    }
+    if (receiptText.contains('fairprice') ||
+        receiptText.contains('food') ||
+        receiptText.contains('cafe')) {
+      return 'Food';
+    }
+
+    return 'Others';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 6),
+      contentPadding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+      title: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.light,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.document_scanner_outlined,
+              color: AppColors.main,
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Scan Receipt'),
+                SizedBox(height: 4),
+                Text(
+                  'Check the details before saving.',
+                  style: TextStyle(
+                    color: AppColors.muted,
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: 430,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _receiptImage == null ? _emptyReceiptBox() : _receiptPreview(),
+              const SizedBox(height: 12),
+              _imageButtons(),
+              const SizedBox(height: 22),
+              _sectionTitle('Extracted Details'),
+              const SizedBox(height: 16),
+              _fieldLabel('Merchant'),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _merchant,
+                decoration: _decoration('Merchant name', Icons.store_outlined),
+              ),
+              const SizedBox(height: 16),
+              _fieldLabel('Amount'),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _amount,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: _decoration('0.00', Icons.attach_money),
+              ),
+              const SizedBox(height: 16),
+              _fieldLabel('Possible category'),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: _category,
+                decoration: _decoration(null, Icons.category_outlined),
+                items: _categories
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _category = value);
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              _fieldLabel('Payment method'),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: _paymentMethod,
+                decoration: _decoration(null, Icons.payment_outlined),
+                items: _paymentMethods
+                    .map(
+                      (method) =>
+                          DropdownMenuItem(value: method, child: Text(method)),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _paymentMethod = value);
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+              _fieldLabel('Date'),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: _pickDate,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.light,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_today, color: AppColors.main),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          '${_date.day}/${_date.month}/${_date.year}',
+                          style: const TextStyle(
+                            color: AppColors.text,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right, color: AppColors.muted),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _saveScannedReceipt,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.main,
+            minimumSize: const Size(150, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: const Text('Save Transaction'),
+        ),
+      ],
+    );
+  }
+
+  Widget _fieldLabel(String text) {
+    return Text(text, style: const TextStyle(fontWeight: FontWeight.w600));
+  }
+
+  Widget _sectionTitle(String text) {
+    return Row(
+      children: [
+        Text(
+          text,
+          style: const TextStyle(
+            color: AppColors.text,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(width: 10),
+        const Expanded(child: Divider(color: AppColors.border)),
+      ],
+    );
+  }
+
+  Widget _imageButtons() {
+    if (!_canUseCamera) {
+      return const SizedBox.shrink();
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.main,
+              side: const BorderSide(color: AppColors.border),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            onPressed: () => _pickReceiptImage(ImageSource.gallery),
+            icon: const Icon(Icons.photo_library_outlined),
+            label: const Text('Gallery'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.main,
+              side: const BorderSide(color: AppColors.border),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            onPressed: () => _pickReceiptImage(ImageSource.camera),
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: const Text('Camera'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _emptyReceiptBox() {
+    return InkWell(
+      onTap: () => _pickReceiptImage(ImageSource.gallery),
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+        decoration: BoxDecoration(
+          color: AppColors.light,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.main.withAlpha(85), width: 1.4),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.main.withAlpha(20),
+                    blurRadius: 12,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.upload_file_outlined,
+                color: AppColors.main,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 14),
+            const Text(
+              'Upload receipt image',
+              style: TextStyle(
+                color: AppColors.text,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 5),
+            const Text(
+              'Choose a clear photo so the details can be suggested.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.muted, fontSize: 13),
+            ),
+            if (!_canUseCamera) ...[
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 9,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: const Text(
+                  'Browse Files',
+                  style: TextStyle(
+                    color: AppColors.main,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _receiptPreview() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: 190,
+            color: AppColors.light,
+            child: Image.memory(_receiptImage!, fit: BoxFit.cover),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withAlpha(85),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 12,
+            bottom: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha(235),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.check_circle_outline,
+                    size: 18,
+                    color: AppColors.main,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _scanStatus,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _decoration(String? hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(icon, color: AppColors.main),
+    );
+  }
+}
+
+const _sampleReceiptText = '''
+FairPrice Finest
+Receipt No: 10293
+Date: 27/06/2026
+Milk 4.80
+Bread 2.90
+Snacks 5.20
+Total 18.90
+''';
