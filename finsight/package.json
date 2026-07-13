@@ -21,8 +21,10 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
     "pg": "^8.21.0",
     "postgres": "^3.4.9",
+    "tesseract.js": "^7.0.0",
     "uuid": "^14.0.1"
   }
 }
