@@ -67,6 +67,21 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
   }
 
+  Future<void> _openBillScan() async {
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (_) => const BillScanDialog(),
+    );
+
+    if (saved == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bill scan details confirmed. Database save next.'),
+        ),
+      );
+    }
+  }
+
   Future<void> _confirmDelete(BuildContext context, int index) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
@@ -636,22 +651,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               ),
               Row(
                 children: [
-                  OutlinedButton.icon(
-                    onPressed: _openReceiptScan,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.main,
-                      side: const BorderSide(color: AppColors.border),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    icon: const Icon(Icons.document_scanner_outlined, size: 18),
-                    label: const Text('Scan'),
-                  ),
+                  _scanMenuButton(),
                   const SizedBox(width: 6),
                   IconButton(
                     tooltip: 'Filter transactions',
@@ -727,6 +727,66 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               );
             }),
         ],
+      ),
+    );
+  }
+
+  Widget _scanMenuButton() {
+    return PopupMenuButton<String>(
+      tooltip: 'Scan',
+      onSelected: (value) {
+        if (value == 'receipt') {
+          _openReceiptScan();
+        } else if (value == 'bill') {
+          _openBillScan();
+        }
+      },
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      itemBuilder: (context) => const [
+        PopupMenuItem(
+          value: 'receipt',
+          child: Row(
+            children: [
+              Icon(Icons.document_scanner_outlined, color: AppColors.main),
+              SizedBox(width: 10),
+              Text('Scan Receipt'),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'bill',
+          child: Row(
+            children: [
+              Icon(Icons.event_repeat_outlined, color: AppColors.main),
+              SizedBox(width: 10),
+              Text('Scan Bill'),
+            ],
+          ),
+        ),
+      ],
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.document_scanner_outlined, size: 18, color: AppColors.main),
+            SizedBox(width: 7),
+            Text(
+              'Scan',
+              style: TextStyle(
+                color: AppColors.main,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(width: 2),
+            Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.main),
+          ],
+        ),
       ),
     );
   }
@@ -1470,6 +1530,456 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
                     Colors.transparent,
                     Colors.black.withAlpha(85),
                   ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 12,
+            bottom: 12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha(235),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.check_circle_outline,
+                    size: 18,
+                    color: AppColors.main,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _scanStatus,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  InputDecoration _decoration(String? hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(icon, color: AppColors.main),
+    );
+  }
+}
+
+class BillScanDialog extends StatefulWidget {
+  const BillScanDialog({super.key});
+
+  @override
+  State<BillScanDialog> createState() => _BillScanDialogState();
+}
+
+class _BillScanDialogState extends State<BillScanDialog> {
+  final _serviceName = TextEditingController(text: 'Netflix Subscription');
+  final _amount = TextEditingController(text: '15.98');
+  final _categories = ['Food', 'Transport', 'Shopping', 'Bills', 'Others'];
+  final _frequencies = ['weekly', 'monthly', 'yearly'];
+  final _paymentMethods = ['Cash', 'Credit Card', 'Bank Transfer', 'EZ-Link'];
+
+  Uint8List? _billImage;
+  String _category = 'Bills';
+  String _frequency = 'monthly';
+  String _paymentMethod = 'Credit Card';
+  String _scanStatus = 'Upload a bill first';
+  DateTime _billingDate = DateTime.now();
+
+  bool get _canUseCamera {
+    return !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.android ||
+            defaultTargetPlatform == TargetPlatform.iOS);
+  }
+
+  @override
+  void dispose() {
+    _serviceName.dispose();
+    _amount.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickBillImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(
+      source: source,
+      imageQuality: 80,
+      maxWidth: 1200,
+    );
+
+    if (pickedImage == null) return;
+
+    final imageBytes = await pickedImage.readAsBytes();
+    setState(() {
+      _billImage = imageBytes;
+      _scanStatus = 'Sample bill details filled';
+      _serviceName.text = 'Netflix Subscription';
+      _amount.text = '15.98';
+      _category = 'Bills';
+      _frequency = 'monthly';
+      _paymentMethod = 'Credit Card';
+      _billingDate = DateTime.now();
+    });
+  }
+
+  Future<void> _pickBillingDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _billingDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2035),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _billingDate = DateTime(picked.year, picked.month, picked.day);
+      });
+    }
+  }
+
+  void _saveBillScan() {
+    final serviceName = _serviceName.text.trim();
+    final amount = double.tryParse(_amount.text.trim());
+
+    if (serviceName.isEmpty || amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Check the bill details first.')),
+      );
+      return;
+    }
+
+    Navigator.pop(context, true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 6),
+      contentPadding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+      title: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.light,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.event_repeat_outlined, color: AppColors.main),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Scan Bill'),
+                SizedBox(height: 4),
+                Text(
+                  'Check recurring payment details before saving.',
+                  style: TextStyle(
+                    color: AppColors.muted,
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      content: SingleChildScrollView(
+        child: SizedBox(
+          width: 430,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _billImage == null ? _emptyBillBox() : _billPreview(),
+              const SizedBox(height: 12),
+              _imageButtons(),
+              const SizedBox(height: 22),
+              _sectionTitle('Recurring Details'),
+              const SizedBox(height: 16),
+              _fieldLabel('Service name'),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _serviceName,
+                decoration: _decoration(
+                  'e.g. Netflix Subscription',
+                  Icons.subscriptions_outlined,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _fieldLabel('Payment amount'),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _amount,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: _decoration('0.00', Icons.attach_money),
+              ),
+              const SizedBox(height: 16),
+              _fieldLabel('Category'),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: _category,
+                decoration: _decoration(null, Icons.category_outlined),
+                items: _categories
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) setState(() => _category = value);
+                },
+              ),
+              const SizedBox(height: 16),
+              _fieldLabel('Frequency'),
+              const SizedBox(height: 8),
+              SegmentedButton<String>(
+                segments: _frequencies
+                    .map(
+                      (freq) => ButtonSegment(
+                        value: freq,
+                        label: Text(freq[0].toUpperCase() + freq.substring(1)),
+                      ),
+                    )
+                    .toList(),
+                selected: {_frequency},
+                onSelectionChanged: (value) {
+                  setState(() => _frequency = value.first);
+                },
+              ),
+              const SizedBox(height: 16),
+              _fieldLabel('Payment method'),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                initialValue: _paymentMethod,
+                decoration: _decoration(null, Icons.payment_outlined),
+                items: _paymentMethods
+                    .map((m) => DropdownMenuItem(value: m, child: Text(m)))
+                    .toList(),
+                onChanged: (value) {
+                  if (value != null) setState(() => _paymentMethod = value);
+                },
+              ),
+              const SizedBox(height: 16),
+              _fieldLabel('Billing date'),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: _pickBillingDate,
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.light,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.calendar_today, color: AppColors.main),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          '${_billingDate.day}/${_billingDate.month}/${_billingDate.year}',
+                          style: const TextStyle(
+                            color: AppColors.text,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right, color: AppColors.muted),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: _saveBillScan,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.main,
+            minimumSize: const Size(150, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: const Text('Confirm Bill'),
+        ),
+      ],
+    );
+  }
+
+  Widget _fieldLabel(String text) {
+    return Text(text, style: const TextStyle(fontWeight: FontWeight.w600));
+  }
+
+  Widget _sectionTitle(String text) {
+    return Row(
+      children: [
+        Text(
+          text,
+          style: const TextStyle(
+            color: AppColors.text,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(width: 10),
+        const Expanded(child: Divider(color: AppColors.border)),
+      ],
+    );
+  }
+
+  Widget _imageButtons() {
+    if (!_canUseCamera) return const SizedBox.shrink();
+
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            style: _uploadButtonStyle(),
+            onPressed: () => _pickBillImage(ImageSource.gallery),
+            icon: const Icon(Icons.photo_library_outlined),
+            label: const Text('Gallery'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: OutlinedButton.icon(
+            style: _uploadButtonStyle(),
+            onPressed: () => _pickBillImage(ImageSource.camera),
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: const Text('Camera'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  ButtonStyle _uploadButtonStyle() {
+    return OutlinedButton.styleFrom(
+      foregroundColor: AppColors.main,
+      side: const BorderSide(color: AppColors.border),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    );
+  }
+
+  Widget _emptyBillBox() {
+    return InkWell(
+      onTap: () => _pickBillImage(ImageSource.gallery),
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 24),
+        decoration: BoxDecoration(
+          color: AppColors.light,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.main.withAlpha(85), width: 1.4),
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.main.withAlpha(20),
+                    blurRadius: 12,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.upload_file_outlined,
+                color: AppColors.main,
+                size: 32,
+              ),
+            ),
+            const SizedBox(height: 14),
+            const Text(
+              'Upload bill or subscription',
+              style: TextStyle(
+                color: AppColors.text,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 5),
+            const Text(
+              'The app will suggest recurring payment details to check.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColors.muted, fontSize: 13),
+            ),
+            if (!_canUseCamera) ...[
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 9,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: const Text(
+                  'Browse Files',
+                  style: TextStyle(
+                    color: AppColors.main,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _billPreview() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: 190,
+            color: AppColors.light,
+            child: Image.memory(_billImage!, fit: BoxFit.cover),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Colors.black.withAlpha(85)],
                 ),
               ),
             ),
