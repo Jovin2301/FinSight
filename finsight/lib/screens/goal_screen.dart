@@ -5,13 +5,16 @@ import './auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../widgets/notification_bell.dart';
+import '../models/goal.dart';
 
 class GoalScreen extends StatefulWidget {
+  final List<Goal> goals;
   final int unreadNotifications;
   final VoidCallback onNotificationsTap;
 
   const GoalScreen({
     super.key,
+    required this.goals,
     required this.unreadNotifications,
     required this.onNotificationsTap,
   });
@@ -178,8 +181,6 @@ class _GoalScreenState extends State<GoalScreen> {
       final auth = context.read<AuthProvider>();
       final goalId = _goals[index]['goalID'];
       final goal = {..._goals[index], ...goalList};
-      print('goal: $goal');
-      print('goalid: $goalId');
 
       final response = await http.put(
         Uri.parse('${dotenv.env['BASE_URL']}/user/updateSavingGoal/$goalId'),

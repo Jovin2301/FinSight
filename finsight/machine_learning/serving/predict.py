@@ -107,6 +107,6 @@ if __name__ == "__main__":
     result = get_overspend_warning(
         sample_budget,
         sample_transactions,
-        today=pd.Timestamp("2026-07-12"),
+        today=pd.Timestamp.now(),
     )
     print(result)
