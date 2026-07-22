@@ -237,6 +237,38 @@ async function updateUserDetail(user) {
     return result.rows[0];
 }
 
+async function changeUserPassword(user) {
+    const existing = await db.query(
+        `SELECT "userPassword" FROM public."User" WHERE "userID" = $1`,
+        [user.userid]
+    );
+
+    if (existing.rows.length === 0) {
+        throw new Error('User not found');
+    }
+
+    const isMatch = await bcrypt.compare(
+        user.currentPassword,
+        existing.rows[0].userPassword
+    );
+
+    if (!isMatch) {
+        throw new Error('Current password is incorrect');
+    }
+
+    const hashedPassword = await bcrypt.hash(user.password, 12);
+
+    const result = await db.query(
+        `UPDATE public."User"
+        SET "userPassword" = $1
+        WHERE "userID" = $2
+        RETURNING *`,
+        [hashedPassword, user.userid]
+    );
+
+    return result.rows[0];
+}
+
 
 
 module.exports = {
@@ -251,5 +283,6 @@ module.exports = {
     getSavingGoal,
     updateSavingGoal,
     deleteSavingGoal,
-    createSavingGoal
+    createSavingGoal,
+    changeUserPassword
 };

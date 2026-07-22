@@ -110,5 +110,13 @@ router.post('/updateUserDetail', authMiddleware, async (req, res) => {
 });
 
 
+router.post('/changeUserPassword', authMiddleware, async (req, res) => {
+    try {
+        const user = await userService.changeUserPassword(req.body);
+        res.status(201).json(user);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
+});
 
 module.exports = router;

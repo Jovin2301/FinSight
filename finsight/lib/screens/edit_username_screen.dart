@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'change_password_screen.dart';
 
 class EditUserDetailsScreen extends StatefulWidget {
   const EditUserDetailsScreen({super.key});
@@ -337,10 +338,10 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                   icon: Icons.lock_rounded,
                   label: 'Change Password',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Feature not available yet'),
-                        duration: Duration(seconds: 2),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ChangePasswordScreen(),
                       ),
                     );
                   },
