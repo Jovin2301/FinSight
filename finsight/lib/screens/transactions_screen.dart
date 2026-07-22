@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/expense.dart';
+import '../models/recurring_payment.dart';
 import '../widgets/expense_card.dart';
 import '../widgets/notification_bell.dart';
 import 'add_expense_screen.dart';
@@ -12,8 +13,13 @@ import 'receipt_scan_dialog.dart';
 
 class TransactionsScreen extends StatefulWidget {
   final List<Expense> expenses;
+  final List<RecurringPayment> recurringPayments;
   final Map<String, String> categoryIcons;
   final ValueChanged<Expense> onAddExpense;
+  final ValueChanged<RecurringPayment> onAddRecurringPayment;
+  final void Function(int index, RecurringPayment payment)
+      onUpdateRecurringPayment;
+  final ValueChanged<int> onDeleteRecurringPayment;
   final void Function(int index, Expense expense) onUpdateExpense;
   final ValueChanged<int> onDeleteExpense;
   final int unreadNotifications;
@@ -22,8 +28,12 @@ class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({
     super.key,
     required this.expenses,
+    required this.recurringPayments,
     this.categoryIcons = const {},
     required this.onAddExpense,
+    required this.onAddRecurringPayment,
+    required this.onUpdateRecurringPayment,
+    required this.onDeleteRecurringPayment,
     required this.onUpdateExpense,
     required this.onDeleteExpense,
     required this.unreadNotifications,
@@ -37,6 +47,9 @@ class TransactionsScreen extends StatefulWidget {
 class _TransactionsScreenState extends State<TransactionsScreen> {
   List<String> _selectedCategories = [];
   String _selectedDate = 'All';
+  bool _showRecurringList = false;
+  bool _showAllRecurring = false;
+  bool _showAllExpenses = false;
 
   Future<void> _openForm(BuildContext context, [int? index]) async {
     final expense = await showDialog<Expense>(
@@ -64,17 +77,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   Future<void> _openBillScan() async {
-    final saved = await showDialog<bool>(
+    final payment = await showDialog<RecurringPayment>(
       context: context,
       builder: (_) => const BillScanDialog(),
     );
 
-    if (saved == true && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Bill scan details confirmed. Database save next.'),
-        ),
-      );
+    if (payment != null) {
+      widget.onAddRecurringPayment(payment);
     }
   }
 
@@ -82,24 +91,248 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Delete Transaction?'),
         content: Text(
           'Remove "${widget.expenses[index].title}" from transactions?',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
-        ],
+        actions: _deleteDialogActions(context),
       ),
     );
 
     if (shouldDelete == true) widget.onDeleteExpense(index);
+  }
+
+  Future<void> _openRecurringForm(int index) async {
+    final payment = widget.recurringPayments[index];
+    final nameController = TextEditingController(text: payment.name);
+    final amountController = TextEditingController(
+      text: payment.amount.toStringAsFixed(2),
+    );
+    final categories = ['Food', 'Transport', 'Shopping', 'Bills', 'Others'];
+    final frequencies = ['weekly', 'monthly', 'yearly'];
+    String category = payment.category;
+    String frequency = payment.frequency;
+    DateTime startDate = payment.startDate;
+
+    final updatedPayment = await showDialog<RecurringPayment>(
+      context: context,
+      builder: (_) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: const Text('Edit Recurring Payment'),
+              content: SizedBox(
+                width: 420,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _dialogLabel('Name'),
+                      TextField(
+                        controller: nameController,
+                        decoration: const InputDecoration(
+                          hintText: 'e.g. Netflix Subscription',
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      _dialogLabel('Amount'),
+                      TextField(
+                        controller: amountController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(hintText: '0.00'),
+                      ),
+                      const SizedBox(height: 14),
+                      _dialogLabel('Category'),
+                      DropdownButtonFormField<String>(
+                        initialValue: categories.contains(category)
+                            ? category
+                            : 'Bills',
+                        items: categories
+                            .map(
+                              (item) => DropdownMenuItem(
+                                value: item,
+                                child: Text(item),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setDialogState(() => category = value);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 14),
+                      _dialogLabel('Frequency'),
+                      SegmentedButton<String>(
+                        segments: frequencies
+                            .map(
+                              (item) => ButtonSegment(
+                                value: item,
+                                label: Text(
+                                  item[0].toUpperCase() + item.substring(1),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        selected: {frequency},
+                        onSelectionChanged: (value) {
+                          setDialogState(() => frequency = value.first);
+                        },
+                      ),
+                      const SizedBox(height: 14),
+                      _dialogLabel('Next billing date'),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: context,
+                            initialDate: startDate,
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime(2035),
+                          );
+
+                          if (picked != null) {
+                            setDialogState(() {
+                              startDate = DateTime(
+                                picked.year,
+                                picked.month,
+                                picked.day,
+                              );
+                            });
+                          }
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.light,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(_dateLabel(startDate)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final amount = double.tryParse(amountController.text);
+                    final name = nameController.text.trim();
+
+                    if (name.isEmpty || amount == null || amount <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Check the recurring details.'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    Navigator.pop(
+                      context,
+                      payment.copyWith(
+                        name: name,
+                        amount: amount,
+                        category: category,
+                        frequency: frequency,
+                        startDate: startDate,
+                      ),
+                    );
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    nameController.dispose();
+    amountController.dispose();
+
+    if (updatedPayment != null) {
+      widget.onUpdateRecurringPayment(index, updatedPayment);
+    }
+  }
+
+  Future<void> _confirmDeleteRecurring(int index) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Delete Recurring Payment?'),
+        content: Text(
+          'Remove "${widget.recurringPayments[index].name}" from recurring payments?',
+        ),
+        actions: _deleteDialogActions(context),
+      ),
+    );
+
+    if (shouldDelete == true) {
+      widget.onDeleteRecurringPayment(index);
+    }
+  }
+
+  List<Widget> _deleteDialogActions(BuildContext context) {
+    return [
+      TextButton(
+        onPressed: () => Navigator.pop(context, false),
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.all(AppColors.muted),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          ),
+        ),
+        child: const Text('Cancel'),
+      ),
+      OutlinedButton(
+        onPressed: () => Navigator.pop(context, true),
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(const Color(0xFFFFF0F0)),
+          foregroundColor: WidgetStateProperty.all(AppColors.red),
+          overlayColor: WidgetStateProperty.all(
+            AppColors.red.withValues(alpha: 0.08),
+          ),
+          side: WidgetStateProperty.all(
+            const BorderSide(color: Color(0xFFFFD4D4)),
+          ),
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+          ),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        child: const Text('Delete'),
+      ),
+    ];
+  }
+
+  Widget _dialogLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(text, style: const TextStyle(fontWeight: FontWeight.w600)),
+    );
   }
 
   void _openFilters(List<String> categories, List<String> dateFilters) {
@@ -232,6 +465,21 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       'Dec',
     ];
     return months[date.month - 1];
+  }
+
+  String _dateLabel(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  String _categoryIcon(String category) {
+    final icon = widget.categoryIcons[category];
+    if (icon != null) return icon;
+
+    if (category == 'Food') return '🍔';
+    if (category == 'Transport') return '🚌';
+    if (category == 'Shopping') return '🛍️';
+    if (category == 'Bills') return '💡';
+    return '💰';
   }
 
   List<DateTime> _recentMonths(DateTime now) {
@@ -470,6 +718,323 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
   }
 
+  Widget _recurringPaymentsSection() {
+    final paymentEntries = widget.recurringPayments.asMap().entries.toList();
+    final shownPayments = _showAllRecurring
+        ? paymentEntries
+        : paymentEntries.take(2).toList();
+    double monthlyTotal = 0;
+    for (final payment in widget.recurringPayments) {
+      monthlyTotal += _monthlyRecurringAmount(payment);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Expanded(
+              child: Text(
+                'Bills & Subscriptions',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: _openBillScan,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.main,
+                side: const BorderSide(color: AppColors.border),
+                minimumSize: const Size(0, 40),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Add bill'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 3),
+        Text(
+          '${widget.recurringPayments.length} saved bills or subscriptions',
+          style: const TextStyle(color: AppColors.muted, fontSize: 13),
+        ),
+        const SizedBox(height: 12),
+        if (widget.recurringPayments.isEmpty)
+          Card(
+            margin: EdgeInsets.zero,
+            elevation: 0,
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: const BorderSide(color: AppColors.border),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.light,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: const Icon(
+                      Icons.event_repeat_outlined,
+                      color: AppColors.main,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'No bills or subscriptions saved yet.',
+                      style: TextStyle(color: AppColors.muted),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _openBillScan,
+                    child: const Text('Add bill'),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else ...[
+          _recurringSummaryCard(monthlyTotal),
+          if (_showRecurringList) ...[
+            const SizedBox(height: 12),
+            ...shownPayments.map((entry) {
+              return _recurringPaymentCard(entry.key, entry.value);
+            }),
+            if (widget.recurringPayments.length > 2)
+              _showMoreButton(
+                isExpanded: _showAllRecurring,
+                showMoreText:
+                    'View all ${widget.recurringPayments.length} recurring payments',
+                onTap: () {
+                  setState(() => _showAllRecurring = !_showAllRecurring);
+                },
+              ),
+          ],
+        ],
+      ],
+    );
+  }
+
+  double _monthlyRecurringAmount(RecurringPayment payment) {
+    if (payment.frequency == 'weekly') return payment.amount * 4;
+    if (payment.frequency == 'yearly') return payment.amount / 12;
+    return payment.amount;
+  }
+
+  Widget _recurringSummaryCard(double monthlyTotal) {
+    return Card(
+      margin: EdgeInsets.zero,
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: AppColors.border),
+      ),
+      child: InkWell(
+        onTap: () {
+          setState(() => _showRecurringList = !_showRecurringList);
+        },
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.light,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.event_repeat_outlined,
+                  color: AppColors.main,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Bills and subscriptions',
+                      style: TextStyle(
+                        color: AppColors.text,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'About \$${monthlyTotal.toStringAsFixed(2)} per month',
+                      style: const TextStyle(
+                        color: AppColors.muted,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                _showRecurringList ? 'Hide' : 'View',
+                style: const TextStyle(
+                  color: AppColors.main,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                _showRecurringList
+                    ? Icons.keyboard_arrow_up_rounded
+                    : Icons.keyboard_arrow_down_rounded,
+                color: AppColors.main,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _showMoreButton({
+    required bool isExpanded,
+    required String showMoreText,
+    required VoidCallback onTap,
+  }) {
+    return TextButton.icon(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.main,
+        padding: EdgeInsets.zero,
+      ),
+      icon: Icon(
+        isExpanded
+            ? Icons.keyboard_arrow_up_rounded
+            : Icons.keyboard_arrow_down_rounded,
+      ),
+      label: Text(isExpanded ? 'Show less' : showMoreText),
+    );
+  }
+
+  Widget _recurringPaymentCard(int index, RecurringPayment payment) {
+    final percentText = payment.frequency[0].toUpperCase() +
+        payment.frequency.substring(1).toLowerCase();
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 14),
+      elevation: 0,
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: const BorderSide(color: AppColors.border),
+      ),
+      child: InkWell(
+        onTap: () => _openRecurringForm(index),
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.light,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Center(
+                  child: Text(
+                    _categoryIcon(payment.category),
+                    style: const TextStyle(fontSize: 22),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      payment.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.text,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${payment.category} • $percentText',
+                      style: const TextStyle(
+                        color: AppColors.muted,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Next ${_dateLabel(payment.startDate)}',
+                      style: const TextStyle(
+                        color: AppColors.muted,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF0F0),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '-\$${payment.amount.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    color: AppColors.red,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF0F0),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  tooltip: 'Delete recurring payment',
+                  onPressed: () => _confirmDeleteRecurring(index),
+                  padding: EdgeInsets.zero,
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.red,
+                    size: 21,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final categories = <String>[];
@@ -511,6 +1076,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     }
 
     results.sort((a, b) => b.value.date.compareTo(a.value.date));
+    final shownResults = _showAllExpenses ? results : results.take(5).toList();
 
     double total = 0;
     for (final entry in results) {
@@ -628,6 +1194,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             },
           ),
           const SizedBox(height: 24),
+          _recurringPaymentsSection(),
+          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -711,7 +1279,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               ),
             )
           else
-            ...results.map((entry) {
+            ...shownResults.map((entry) {
               final originalIndex = entry.key;
               final expense = entry.value;
 
@@ -722,44 +1290,23 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 onDelete: () => _confirmDelete(context, originalIndex),
               );
             }),
+          if (results.length > 5)
+            _showMoreButton(
+              isExpanded: _showAllExpenses,
+              showMoreText: 'View all ${results.length} expenses',
+              onTap: () {
+                setState(() => _showAllExpenses = !_showAllExpenses);
+              },
+            ),
         ],
       ),
     );
   }
 
   Widget _scanMenuButton() {
-    return PopupMenuButton<String>(
-      tooltip: 'Scan',
-      onSelected: (value) {
-        if (value == 'receipt') {
-          _openReceiptScan();
-        } else if (value == 'bill') {
-          _openBillScan();
-        }
-      },
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      itemBuilder: (context) => const [
-        PopupMenuItem(
-          value: 'receipt',
-          child: Row(
-            children: [
-              Icon(Icons.document_scanner_outlined, color: AppColors.main),
-              SizedBox(width: 10),
-              Text('Scan Receipt'),
-            ],
-          ),
-        ),
-        PopupMenuItem(
-          value: 'bill',
-          child: Row(
-            children: [
-              Icon(Icons.event_repeat_outlined, color: AppColors.main),
-              SizedBox(width: 10),
-              Text('Scan Bill'),
-            ],
-          ),
-        ),
-      ],
+    return InkWell(
+      onTap: _openReceiptScan,
+      borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
@@ -770,17 +1317,19 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.document_scanner_outlined, size: 18, color: AppColors.main),
+            Icon(
+              Icons.document_scanner_outlined,
+              size: 18,
+              color: AppColors.main,
+            ),
             SizedBox(width: 7),
             Text(
-              'Scan',
+              'Scan receipt',
               style: TextStyle(
                 color: AppColors.main,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            SizedBox(width: 2),
-            Icon(Icons.keyboard_arrow_down, size: 18, color: AppColors.main),
           ],
         ),
       ),

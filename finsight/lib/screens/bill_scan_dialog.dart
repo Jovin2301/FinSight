@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 import '../constants/app_colors.dart';
+import '../models/recurring_payment.dart';
 
 class BillScanDialog extends StatefulWidget {
   const BillScanDialog({super.key});
@@ -27,7 +28,7 @@ class _BillScanDialogState extends State<BillScanDialog> {
   String _category = 'Bills';
   String _frequency = 'monthly';
   String _paymentMethod = 'Credit Card';
-  String _scanStatus = 'Upload a bill first';
+  String _scanStatus = 'Upload a bill to auto-fill, or type below';
   DateTime _billingDate = DateTime.now();
 
   bool get _canUseCamera {
@@ -176,6 +177,7 @@ class _BillScanDialogState extends State<BillScanDialog> {
       'netflix',
       'spotify',
       'disney',
+      'disney+',
       'youtube',
       'google',
       'apple',
@@ -184,46 +186,74 @@ class _BillScanDialogState extends State<BillScanDialog> {
       'starhub',
       'm1',
       'sp services',
+      'sp group',
+      'openai',
+      'chatgpt',
+      'canva',
       'aws',
       'microsoft',
       'adobe',
       'gym',
+      'anytime fitness',
+      'activesg',
     ];
     final ignoredWords = [
       'invoice',
       'bill',
       'receipt',
+      'tax invoice',
       'date',
       'due',
       'amount',
       'total',
       'payment',
       'account',
+      'savings account',
+      'current account',
+      'bank account',
       'statement',
       'transaction',
+      'reference',
+      'receipt no',
+      'customer',
+      'card',
+      'visa',
+      'mastercard',
+      'paylah',
+      'paynow',
+      'dbs',
+      'uob',
+      'ocbc',
+      'posb',
     ];
 
     for (final line in lines.take(12)) {
       final lowerLine = line.toLowerCase();
-      if (knownServices.any(lowerLine.contains)) {
+      final shouldIgnore = ignoredWords.any(lowerLine.contains);
+
+      if (!shouldIgnore && knownServices.any(lowerLine.contains)) {
         return _cleanBillLine(line);
       }
     }
 
-    for (final line in lines.take(8)) {
+    for (final line in lines.take(12)) {
       final lowerLine = line.toLowerCase();
-      final hasAmount = RegExp(r'\d+\.\d{2}').hasMatch(line);
-      final hasDate = RegExp(r'\d{1,4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,4}')
-          .hasMatch(line);
+      final hasAmount = _amountsFromText(line).isNotEmpty;
+      final hasDate = _dateFromText(line) != null;
       final shouldIgnore = ignoredWords.any(lowerLine.contains);
       final enoughLetters = line.replaceAll(RegExp(r'[^A-Za-z]'), '').length >= 3;
+      final tooManyNumbers = RegExp(r'\d').allMatches(line).length > 4;
 
-      if (!hasAmount && !hasDate && !shouldIgnore && enoughLetters) {
+      if (!hasAmount &&
+          !hasDate &&
+          !shouldIgnore &&
+          enoughLetters &&
+          !tooManyNumbers) {
         return _cleanBillLine(line);
       }
     }
 
-    return lines.isEmpty ? null : _cleanBillLine(lines.first);
+    return null;
   }
 
   String _cleanBillLine(String line) {
@@ -236,20 +266,38 @@ class _BillScanDialogState extends State<BillScanDialog> {
 
   double? _findBillAmount(String text) {
     final lines = text.split('\n').map((line) => line.trim()).toList();
-    final amountWords = [
+    final strongAmountWords = [
       'amount due',
       'total due',
+      'payment due',
       'bill amount',
+      'invoice amount',
+      'amount payable',
       'monthly charge',
       'subscription fee',
       'grand total',
-      'total',
     ];
-    final skipWords = ['previous balance', 'outstanding', 'subtotal'];
+    final normalAmountWords = [
+      'total',
+      'charged',
+      'paid',
+    ];
+    final skipWords = [
+      'previous balance',
+      'outstanding',
+      'subtotal',
+      'sub total',
+      'gst',
+      'tax',
+      'balance brought',
+      'minimum payment',
+      'cashback',
+      'points',
+    ];
 
     for (final line in lines.reversed) {
       final lowerLine = line.toLowerCase();
-      final isAmountLine = amountWords.any(lowerLine.contains);
+      final isAmountLine = strongAmountWords.any(lowerLine.contains);
       final shouldSkip = skipWords.any(lowerLine.contains);
       if (!isAmountLine || shouldSkip) continue;
 
@@ -257,17 +305,42 @@ class _BillScanDialogState extends State<BillScanDialog> {
       if (amount != null) return amount;
     }
 
-    return _lastBillAmountInText(text);
+    for (final line in lines.reversed) {
+      final lowerLine = line.toLowerCase();
+      final isAmountLine = normalAmountWords.any(lowerLine.contains);
+      final shouldSkip = skipWords.any(lowerLine.contains);
+      if (!isAmountLine || shouldSkip) continue;
+
+      final amount = _lastBillAmountInText(line);
+      if (amount != null) return amount;
+    }
+
+    final amounts = _amountsFromText(text)
+        .where((amount) => amount > 0 && amount < 10000)
+        .toList();
+    if (amounts.isEmpty) return null;
+
+    amounts.sort();
+    return amounts.last;
   }
 
   double? _lastBillAmountInText(String text) {
-    final matches = RegExp(r'(?:\$|sgd|s\$)?\s*(\d{1,4}(?:,\d{3})*\.\d{2})',
-            caseSensitive: false)
-        .allMatches(text)
-        .toList();
-    if (matches.isEmpty) return null;
+    final amounts = _amountsFromText(text);
+    if (amounts.isEmpty) return null;
 
-    return double.tryParse(matches.last.group(1)!.replaceAll(',', ''));
+    return amounts.last;
+  }
+
+  List<double> _amountsFromText(String text) {
+    final matches = RegExp(
+      r'(?:\$|sgd|s\$)?\s*(\d{1,5}(?:,\d{3})*\.\d{2})',
+      caseSensitive: false,
+    ).allMatches(text);
+
+    return matches
+        .map((match) => double.tryParse(match.group(1)!.replaceAll(',', '')))
+        .whereType<double>()
+        .toList();
   }
 
   DateTime? _findBillDate(String text) {
@@ -315,7 +388,64 @@ class _BillScanDialogState extends State<BillScanDialog> {
       }
     }
 
+    final monthNameDate = RegExp(
+      r'(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{2,4})',
+      caseSensitive: false,
+    ).firstMatch(text);
+    if (monthNameDate != null) {
+      final day = int.tryParse(monthNameDate.group(1)!);
+      final month = _monthFromText(monthNameDate.group(2)!);
+      final year = _normalBillYear(monthNameDate.group(3)!);
+      if (day != null && month != null && year != null) {
+        return DateTime(year, month, day);
+      }
+    }
+
+    final monthNameFirst = RegExp(
+      r'([A-Za-z]{3,9})\s+(\d{1,2}),?\s+(\d{2,4})',
+      caseSensitive: false,
+    ).firstMatch(text);
+    if (monthNameFirst != null) {
+      final month = _monthFromText(monthNameFirst.group(1)!);
+      final day = int.tryParse(monthNameFirst.group(2)!);
+      final year = _normalBillYear(monthNameFirst.group(3)!);
+      if (day != null && month != null && year != null) {
+        return DateTime(year, month, day);
+      }
+    }
+
     return null;
+  }
+
+  int? _monthFromText(String text) {
+    const months = {
+      'jan': 1,
+      'january': 1,
+      'feb': 2,
+      'february': 2,
+      'mar': 3,
+      'march': 3,
+      'apr': 4,
+      'april': 4,
+      'may': 5,
+      'jun': 6,
+      'june': 6,
+      'jul': 7,
+      'july': 7,
+      'aug': 8,
+      'august': 8,
+      'sep': 9,
+      'sept': 9,
+      'september': 9,
+      'oct': 10,
+      'october': 10,
+      'nov': 11,
+      'november': 11,
+      'dec': 12,
+      'december': 12,
+    };
+
+    return months[text.toLowerCase()];
   }
 
   int? _normalBillYear(String text) {
@@ -331,11 +461,14 @@ class _BillScanDialogState extends State<BillScanDialog> {
 
     if (billText.contains('annual') ||
         billText.contains('yearly') ||
+        billText.contains('annually') ||
         billText.contains('per year') ||
-        billText.contains('/year')) {
+        billText.contains('/year') ||
+        billText.contains('12 months')) {
       return 'yearly';
     }
     if (billText.contains('weekly') ||
+        billText.contains('every week') ||
         billText.contains('per week') ||
         billText.contains('/week')) {
       return 'weekly';
@@ -350,7 +483,13 @@ class _BillScanDialogState extends State<BillScanDialog> {
     if (billText.contains('netflix') ||
         billText.contains('spotify') ||
         billText.contains('disney') ||
-        billText.contains('youtube')) {
+        billText.contains('youtube') ||
+        billText.contains('apple') ||
+        billText.contains('icloud') ||
+        billText.contains('openai') ||
+        billText.contains('chatgpt') ||
+        billText.contains('canva') ||
+        billText.contains('adobe')) {
       return 'Others';
     }
     if (billText.contains('singtel') ||
@@ -377,6 +516,9 @@ class _BillScanDialogState extends State<BillScanDialog> {
     }
     if (billText.contains('paynow') ||
         billText.contains('paylah') ||
+        billText.contains('saving account') ||
+        billText.contains('savings account') ||
+        billText.contains('current account') ||
         billText.contains('dbs') ||
         billText.contains('uob') ||
         billText.contains('ocbc') ||
@@ -425,7 +567,17 @@ class _BillScanDialogState extends State<BillScanDialog> {
       return;
     }
 
-    Navigator.pop(context, true);
+    Navigator.pop(
+      context,
+      RecurringPayment(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: serviceName,
+        category: _category,
+        amount: amount,
+        frequency: _frequency,
+        startDate: _billingDate,
+      ),
+    );
   }
 
   @override
@@ -455,10 +607,10 @@ class _BillScanDialogState extends State<BillScanDialog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Scan Bill'),
+                Text('Add Bill'),
                 SizedBox(height: 4),
                 Text(
-                  'Check recurring payment details before saving.',
+                  'Type the details manually or upload a bill to auto-fill.',
                   style: TextStyle(
                     color: AppColors.muted,
                     fontSize: 14,
@@ -480,7 +632,7 @@ class _BillScanDialogState extends State<BillScanDialog> {
               const SizedBox(height: 12),
               _imageButtons(),
               const SizedBox(height: 22),
-              _sectionTitle('Recurring Details'),
+              _sectionTitle('Bill Details'),
               const SizedBox(height: 16),
               _fieldLabel('Service name'),
               const SizedBox(height: 8),
@@ -594,7 +746,7 @@ class _BillScanDialogState extends State<BillScanDialog> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: const Text('Confirm Bill'),
+          child: const Text('Save Bill'),
         ),
       ],
     );
@@ -700,7 +852,7 @@ class _BillScanDialogState extends State<BillScanDialog> {
             ),
             const SizedBox(height: 5),
             const Text(
-              'The app will suggest recurring payment details to check.',
+              'Optional. You can also fill in the details manually.',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColors.muted, fontSize: 13),
             ),

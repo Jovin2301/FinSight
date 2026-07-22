@@ -50,7 +50,11 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ),
       TransactionsScreen(
         expenses: _expenses,
+        recurringPayments: const [],
         onAddExpense: (expense) => setState(() => _expenses.add(expense)),
+        onAddRecurringPayment: (_) {},
+        onUpdateRecurringPayment: (index, payment) {},
+        onDeleteRecurringPayment: (_) {},
         onUpdateExpense: (index, expense) {
           setState(() => _expenses[index] = expense);
         },

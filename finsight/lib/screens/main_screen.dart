@@ -8,6 +8,7 @@ import '../models/budget.dart';
 import '../models/expense.dart';
 import '../models/goal.dart';
 import '../models/app_notification.dart';
+import '../models/recurring_payment.dart';
 import '../constants/app_colors.dart';
 import './auth_provider.dart';
 import './transactions_screen.dart';
@@ -64,6 +65,7 @@ class _MainScreenState extends State<MainScreen> {
       : [];
 
   final List<Goal> _goals = [];
+  final List<RecurringPayment> _recurringPayments = [];
 
   // final List<Goal> _goals = [
   //   const Goal(
@@ -131,6 +133,7 @@ class _MainScreenState extends State<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadBudgets();
       _loadTransactions();
+      _loadRecurringPayments();
     });
   }
 
@@ -233,6 +236,30 @@ class _MainScreenState extends State<MainScreen> {
       }
     } catch (e) {
       _showMessage('Could not connect to server');
+    }
+  }
+
+  Future<void> _loadRecurringPayments() async {
+    if (_previewBudgetPage) return;
+    if (context.read<AuthProvider>().token == null) return;
+
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['BASE_URL']}/recurring'),
+        headers: _headers(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List;
+        if (!mounted) return;
+        setState(() {
+          _recurringPayments
+            ..clear()
+            ..addAll(data.map((item) => RecurringPayment.fromJson(item)));
+        });
+      }
+    } catch (e) {
+      _showMessage('Could not load recurring payments');
     }
   }
 
@@ -398,6 +425,97 @@ class _MainScreenState extends State<MainScreen> {
         await _loadBudgets();
       } else {
         _showMessage('Could not add transaction');
+      }
+    } catch (e) {
+      _showMessage('Could not connect to server');
+    }
+  }
+
+  void _addRecurringPayment(RecurringPayment payment) async {
+    if (_previewBudgetPage) {
+      setState(() => _recurringPayments.add(payment));
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('${dotenv.env['BASE_URL']}/recurring'),
+        headers: _headers(),
+        body: jsonEncode(payment.toJson()),
+      );
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body) as List;
+        if (!mounted) return;
+        setState(() {
+          _recurringPayments
+            ..clear()
+            ..addAll(data.map((item) => RecurringPayment.fromJson(item)));
+        });
+        _showMessage('Recurring payment saved');
+      } else {
+        _showMessage('Could not save recurring payment');
+      }
+    } catch (e) {
+      _showMessage('Could not connect to server');
+    }
+  }
+
+  void _updateRecurringPayment(int index, RecurringPayment payment) async {
+    if (_previewBudgetPage) {
+      setState(() => _recurringPayments[index] = payment);
+      return;
+    }
+
+    try {
+      final response = await http.put(
+        Uri.parse('${dotenv.env['BASE_URL']}/recurring/${payment.id}'),
+        headers: _headers(),
+        body: jsonEncode(payment.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List;
+        if (!mounted) return;
+        setState(() {
+          _recurringPayments
+            ..clear()
+            ..addAll(data.map((item) => RecurringPayment.fromJson(item)));
+        });
+        _showMessage('Recurring payment updated');
+      } else {
+        _showMessage('Could not update recurring payment');
+      }
+    } catch (e) {
+      _showMessage('Could not connect to server');
+    }
+  }
+
+  void _deleteRecurringPayment(int index) async {
+    if (_previewBudgetPage) {
+      setState(() => _recurringPayments.removeAt(index));
+      return;
+    }
+
+    final payment = _recurringPayments[index];
+
+    try {
+      final response = await http.delete(
+        Uri.parse('${dotenv.env['BASE_URL']}/recurring/${payment.id}'),
+        headers: _headers(),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as List;
+        if (!mounted) return;
+        setState(() {
+          _recurringPayments
+            ..clear()
+            ..addAll(data.map((item) => RecurringPayment.fromJson(item)));
+        });
+        _showMessage('Recurring payment deleted');
+      } else {
+        _showMessage('Could not delete recurring payment');
       }
     } catch (e) {
       _showMessage('Could not connect to server');
@@ -630,10 +748,14 @@ class _MainScreenState extends State<MainScreen> {
       // Transactions
       TransactionsScreen(
         expenses: _expenses,
+        recurringPayments: _recurringPayments,
         categoryIcons: {
           for (final budget in _budgets) budget.category: budget.icon,
         },
         onAddExpense: _addExpense,
+        onAddRecurringPayment: _addRecurringPayment,
+        onUpdateRecurringPayment: _updateRecurringPayment,
+        onDeleteRecurringPayment: _deleteRecurringPayment,
         onUpdateExpense: _updateExpense,
         onDeleteExpense: _deleteExpense,
         unreadNotifications: _unreadNotifications,
