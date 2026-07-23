@@ -86,7 +86,9 @@ class FinSightApp extends StatelessWidget {
         future: context.read<AuthProvider>().tryAutoLogin(),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
           // automatically sends user to the right screen on launch
           return context.watch<AuthProvider>().isLoggedIn
