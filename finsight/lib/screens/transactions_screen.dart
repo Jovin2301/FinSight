@@ -803,20 +803,27 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Expanded(
-              child: Text(
-                'Bills & Subscriptions',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Bills & Subscriptions',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ),
+            const SizedBox(width: 10),
             OutlinedButton.icon(
               onPressed: _openBillScan,
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.main,
                 side: const BorderSide(color: AppColors.border),
                 minimumSize: const Size(0, 40),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -1225,6 +1232,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
                 Text(
                   '${results.length} items',
                   style: const TextStyle(color: AppColors.muted),
@@ -1268,55 +1276,66 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           _recurringPaymentsSection(),
           const SizedBox(height: 24),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Recent Expenses',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${results.length} items',
-                    style: const TextStyle(color: AppColors.muted),
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Recent Expenses',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${results.length} items',
+                      style: const TextStyle(color: AppColors.muted),
+                    ),
+                  ],
+                ),
               ),
-              Row(
-                children: [
-                  IconButton(
-                    tooltip: 'Export transactions',
-                    onPressed: _isExporting
-                        ? null
-                        : () => _exportTransactions(results),
-                    icon: _isExporting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.ios_share_rounded),
-                    color: AppColors.muted,
+              IconButton(
+                tooltip: 'Export transactions',
+                onPressed: _isExporting
+                    ? null
+                    : () => _exportTransactions(results),
+                icon: _isExporting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.ios_share_rounded),
+                color: AppColors.muted,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(child: _scanMenuButton()),
+              const SizedBox(width: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: hasFilters ? AppColors.lightMint : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: hasFilters ? AppColors.main : AppColors.border,
                   ),
-              Row(
-                children: [
-                  _scanMenuButton(),
-                  const SizedBox(width: 6),
-                      IconButton(
-                        tooltip: 'Filter transactions',
-                        onPressed: () => _openFilters(categories, dateFilters),
-                        icon: Badge(
-                          isLabelVisible: hasFilters,
-                          label: Text('$filterCount'),
-                          child: const Icon(Icons.filter_alt_rounded),
-                        ),
-                        color: hasFilters ? AppColors.main : AppColors.muted,
+                ),
+                child: IconButton(
+                  tooltip: 'Filter transactions',
+                  onPressed: () => _openFilters(categories, dateFilters),
+                  icon: Badge(
+                    isLabelVisible: hasFilters,
+                    label: Text('$filterCount'),
+                    child: const Icon(Icons.filter_alt_rounded),
                   ),
-                ],
-                  ),
-                ],
+                  color: hasFilters ? AppColors.main : AppColors.muted,
+                ),
               ),
             ],
           ),
@@ -1404,6 +1423,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           border: Border.all(color: AppColors.border),
         ),
         child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
@@ -1412,11 +1432,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               color: AppColors.main,
             ),
             SizedBox(width: 7),
-            Text(
-              'Scan receipt',
-              style: TextStyle(
-                color: AppColors.main,
-                fontWeight: FontWeight.w600,
+            Flexible(
+              child: Text(
+                'Scan receipt',
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: AppColors.main,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],

@@ -115,6 +115,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadBudgets();
+      _loadGoals();
       _loadTransactions();
       _loadRecurringPayments();
     });
