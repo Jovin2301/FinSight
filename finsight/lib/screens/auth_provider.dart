@@ -38,8 +38,6 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void updateUser(Map<String, dynamic> updatedUser) {
-    print("UPDATED USER:");
-    print(updatedUser);
 
     _user = {
       ..._user ?? {},

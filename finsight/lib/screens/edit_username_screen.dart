@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'change_password_screen.dart';
 
 class EditUserDetailsScreen extends StatefulWidget {
   const EditUserDetailsScreen({super.key});
@@ -84,7 +85,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
 
       if (response.statusCode == 201) {
         final updatedUser = jsonDecode(response.body);
-        
+
         // Update local provider
         authProvider.updateUser({
           'username': updatedUser?['userName'],
@@ -209,10 +210,10 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                         ),
                       ],
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'V',
-                        style: TextStyle(
+                        username.isNotEmpty ? username[0].toUpperCase() : '?',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 34,
                           fontWeight: FontWeight.w700,
@@ -220,27 +221,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                       ),
                     ),
                   ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: _bgColor, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 4,
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.camera_alt_rounded,
-                          color: _tealDark, size: 14),
-                    ),
-                  ),
+                  
                 ],
               ),
             ),
@@ -357,10 +338,10 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                   icon: Icons.lock_rounded,
                   label: 'Change Password',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Feature not available yet'),
-                        duration: Duration(seconds: 2),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ChangePasswordScreen(),
                       ),
                     );
                   },

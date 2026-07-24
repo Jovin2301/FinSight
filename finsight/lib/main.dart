@@ -1,13 +1,16 @@
-import 'package:finsight/screens/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'constants/app_colors.dart';
-import 'package:provider/provider.dart';
-import './screens/auth_provider.dart';
-import './screens/main_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+
+import 'constants/app_colors.dart';
+import 'screens/auth_provider.dart';
+import 'screens/splash_screen.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   await dotenv.load(fileName: ".env");
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => AuthProvider(),
@@ -24,15 +27,18 @@ class FinSightApp extends StatelessWidget {
     return MaterialApp(
       title: 'FinSight',
       debugShowCheckedModeBanner: false,
+
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.white,
+
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primaryTeal,
           primary: AppColors.primaryTeal,
           secondary: AppColors.accentMint,
           surface: Colors.white,
         ),
+
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           foregroundColor: AppColors.darkText,
@@ -44,15 +50,18 @@ class FinSightApp extends StatelessWidget {
             color: AppColors.darkText,
           ),
         ),
+
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: AppColors.primaryTeal,
           foregroundColor: Colors.white,
           elevation: 4,
         ),
+
         inputDecorationTheme: const InputDecorationTheme(
           filled: true,
           fillColor: AppColors.lightMint,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding:
+              EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(16)),
             borderSide: BorderSide(color: AppColors.softBorder),
@@ -63,15 +72,17 @@ class FinSightApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(16)),
-            borderSide: BorderSide(color: AppColors.primaryTeal, width: 2),
+            borderSide:
+                BorderSide(color: AppColors.primaryTeal, width: 2),
           ),
         ),
+
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryTeal,
             foregroundColor: Colors.white,
-            elevation: 0,
             minimumSize: const Size(double.infinity, 54),
+            elevation: 0,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -82,20 +93,8 @@ class FinSightApp extends StatelessWidget {
           ),
         ),
       ),
-      home: FutureBuilder(
-        future: context.read<AuthProvider>().tryAutoLogin(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-          // automatically sends user to the right screen on launch
-          return context.watch<AuthProvider>().isLoggedIn
-              ? const MainScreen()
-              : const LoginScreen();
-        },
-      ),
+
+      home: const SplashScreen(),
     );
   }
 }

@@ -36,6 +36,7 @@ async function getBudgets(userId) {
     const result = await db.query(
         `SELECT
             b."budgetID" AS id,
+            b."catID" AS "catId",
             b."budgetName" AS name,
             b."budgetDesc" AS description,
             b."budgetLimit" AS "limit",
@@ -56,7 +57,7 @@ async function getBudgets(userId) {
             ON t."userID" = b."userID"
             AND t."catID" = b."catID"
             AND t."transDate" BETWEEN b."budgetStartDate" AND b."budgetEndDate"
-        WHERE b."userID" = $1
+        WHERE b."userID" = $1 AND b."budgetStatus" = 'Active'
         GROUP BY b."budgetID", c."catName"
         ORDER BY b."budgetStartDate" DESC, b."budgetName"`,
         [userId]
@@ -139,7 +140,8 @@ async function updateBudget(userId, budgetId, budget) {
 // delete budget
 async function deleteBudget(userId, budgetId) {
     await db.query(
-        `DELETE FROM public."Budget"
+        `UPDATE public."Budget"
+        SET "budgetStatus" = 'Inactive'
         WHERE "budgetID" = $1 AND "userID" = $2`,
         [budgetId, userId]
     );

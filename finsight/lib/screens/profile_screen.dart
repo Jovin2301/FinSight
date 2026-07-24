@@ -69,11 +69,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       );
 
-      print('Prefs status: ${response.statusCode}');
-      print('Prefs body: ${response.body}');
 
       if (response.statusCode == 201) {
         final prefs = jsonDecode(response.body);
+
+        if (!mounted) return;
 
         setState(() {
           _selectedCurrency = prefs['prefCurrency'] ?? 'SGD';
@@ -126,9 +126,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (theme != null) 'prefTheme': theme, // → prefTheme
         }),
       );
-
-      print('Status: ${response.statusCode}');
-      print('Body: ${response.body}');
 
       if (response.statusCode != 201) throw Exception('Failed to save');
 

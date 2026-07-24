@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -27,11 +26,11 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   static const bool _previewBudgetPage = false;
-
+  
   int _currentIndex = 0;
   bool _loadingBudgets = false;
   List<String> _budgetCategories = [];
-
+  List<Goal> _goals = [];
   final List<Budget> _budgets = _previewBudgetPage
       ? [
           const Budget(
@@ -64,23 +63,7 @@ class _MainScreenState extends State<MainScreen> {
         ]
       : [];
 
-  final List<Goal> _goals = [];
   final List<RecurringPayment> _recurringPayments = [];
-
-  // final List<Goal> _goals = [
-  //   const Goal(
-  //     id: '1',
-  //     title: 'Emergency Fund',
-  //     targetAmount: 1000,
-  //     savedAmount: 250,
-  //   ),
-  //   const Goal(
-  //     id: '2',
-  //     title: 'New Laptop',
-  //     targetAmount: 2000,
-  //     savedAmount: 600,
-  //   ),
-  // ];
 
   List<AppNotification> _notifications = _previewBudgetPage
       ? [
@@ -600,7 +583,7 @@ class _MainScreenState extends State<MainScreen> {
         Uri.parse('${dotenv.env['BASE_URL']}/user/getSavingGoal'),
         headers: _headers(),
       );
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         final data = jsonDecode(response.body) as List;
         if (!mounted) return;
         setState(() {
@@ -608,10 +591,14 @@ class _MainScreenState extends State<MainScreen> {
             ..clear()
             ..addAll(data.map((item) => Goal.fromJson(item)));
         });
+      } else {  // add this temporarily
+        _showMessage('response ${response.statusCode}');
       }
+
     } catch (e) {
+      print('Goal load error: ${e.toString()}');   // add this temporarily
       _showMessage('Could not load goals');
-    }
+   }
   }
 
 
@@ -772,11 +759,13 @@ class _MainScreenState extends State<MainScreen> {
         onUpdateBudget: _updateBudget,
         onDeleteBudget: _deleteBudget,
       ),
+      // Goals
       GoalScreen(
+        goals: _goals,
         unreadNotifications: _unreadNotifications,
         onNotificationsTap: _openNotifications,
       ),
-      // Goals
+      
       // Profile
       ProfileScreen(
         unreadNotifications: _unreadNotifications,

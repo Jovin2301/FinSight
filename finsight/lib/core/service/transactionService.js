@@ -98,9 +98,26 @@ async function deleteTransaction(userId, transactionId) {
     );
 }
 
+async function getTransactionsForBudget(userId, catId, startDate) {
+    const result = await db.query(
+        `SELECT
+            t."transDate" AS "transDate",
+            t."transAmt" AS "transAmt"
+        FROM public."transactionHistory" t
+        WHERE t."userID" = $1
+            AND t."catID" = $2
+            AND t."transDate" >= $3
+        ORDER BY t."transDate" ASC`,
+        [userId, catId, startDate]
+    );
+
+    return result.rows;
+}
+
 module.exports = {
     getTransactions,
     createTransaction,
     updateTransaction,
-    deleteTransaction
+    deleteTransaction,
+    getTransactionsForBudget
 };

@@ -1,0 +1,6 @@
+catID,catName,catDesc,catType
+6dab2073-ff40-4704-8a15-0d3593de8c52,Food & Dining,"Meals, restaurants, coffee, snacks",expense
+26834e16-112d-49cd-bdc2-f5c8c7c1144e,Transport,"Public transport, Grab, fuel, tolls",expense
+cc8cf728-fe77-4f13-b7dd-9de973ae6183,Salary,Monthly employment income,income
+51efabd6-edc4-48c6-8e69-a4d2cc58ca34,Entertainment,"Movies, games, streaming services",expense
+e5844fa7-c620-4d55-a4b4-2b4d437950fb,Utilities,"Electricity, water, internet bills",expense

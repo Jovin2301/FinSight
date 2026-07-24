@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:csv/csv.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import '../constants/app_colors.dart';
 import '../models/expense.dart';
 import '../models/recurring_payment.dart';
@@ -50,6 +53,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   bool _showRecurringList = false;
   bool _showAllRecurring = false;
   bool _showAllExpenses = false;
+  bool _isExporting = false;
 
   Future<void> _openForm(BuildContext context, [int? index]) async {
     final expense = await showDialog<Expense>(
@@ -486,6 +490,73 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     return List.generate(6, (index) {
       return DateTime(now.year, now.month - 5 + index);
     });
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/'
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year}';
+  }
+
+  Future<void> _exportTransactions(List<MapEntry<int, Expense>> results) async {
+    if (_isExporting) return;
+
+    if (results.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No transactions to export.')),
+      );
+      return;
+    }
+
+    setState(() => _isExporting = true);
+
+    try {
+      final rows = <List<dynamic>>[
+        ['Date', 'Title', 'Category', 'Amount'],
+        ...results.map((entry) {
+          final expense = entry.value;
+          return [
+            _formatDate(expense.date),
+            expense.title,
+            expense.category,
+            expense.amount.toStringAsFixed(2),
+          ];
+        }),
+      ];
+
+      final csvData = const ListToCsvConverter().convert(rows);
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = 'transactions_$timestamp.csv';
+
+      // Desktop platforms (macOS/Windows/Linux) have a real Downloads
+      // folder the app can write to directly.
+      if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir != null) {
+          if (!await downloadsDir.exists()) {
+            await downloadsDir.create(recursive: true);
+          }
+          final file = File('${downloadsDir.path}/$fileName');
+          await file.writeAsString(csvData);
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Saved to Downloads: $fileName')),
+            );
+          }
+          return;
+        }
+      }
+
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Export failed: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
   }
 
   Widget _chartContainer({
@@ -1215,17 +1286,35 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               ),
               Row(
                 children: [
+                  IconButton(
+                    tooltip: 'Export transactions',
+                    onPressed: _isExporting
+                        ? null
+                        : () => _exportTransactions(results),
+                    icon: _isExporting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.ios_share_rounded),
+                    color: AppColors.muted,
+                  ),
+              Row(
+                children: [
                   _scanMenuButton(),
                   const SizedBox(width: 6),
-                  IconButton(
-                    tooltip: 'Filter transactions',
-                    onPressed: () => _openFilters(categories, dateFilters),
-                    icon: Badge(
-                      isLabelVisible: hasFilters,
-                      label: Text('$filterCount'),
-                      child: const Icon(Icons.filter_alt_rounded),
-                    ),
-                    color: hasFilters ? AppColors.main : AppColors.muted,
+                      IconButton(
+                        tooltip: 'Filter transactions',
+                        onPressed: () => _openFilters(categories, dateFilters),
+                        icon: Badge(
+                          isLabelVisible: hasFilters,
+                          label: Text('$filterCount'),
+                          child: const Icon(Icons.filter_alt_rounded),
+                        ),
+                        color: hasFilters ? AppColors.main : AppColors.muted,
+                  ),
+                ],
                   ),
                 ],
               ),

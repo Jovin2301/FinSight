@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 .env
+.venv
 node_modules
 eng.traineddata
 # IntelliJ related
@@ -45,3 +46,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+.DS_Store
