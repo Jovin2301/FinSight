@@ -36,6 +36,7 @@ async function getBudgets(userId) {
     const result = await db.query(
         `SELECT
             b."budgetID" AS id,
+            b."catID" AS "catId",
             b."budgetName" AS name,
             b."budgetDesc" AS description,
             b."budgetLimit" AS "limit",

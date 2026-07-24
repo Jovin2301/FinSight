@@ -1,9 +1,5 @@
-// Client for the Python overspend-risk prediction service (machine_learning/serving/app.py).
-// Keeps ML concerns isolated so callers (notificationService, budgetService) don't
-// need to know this is an HTTP call to a separate model process.
-
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
-const REQUEST_TIMEOUT_MS = Number(process.env.ML_SERVICE_TIMEOUT_MS) || 3000;
+const REQUEST_TIMEOUT_MS = Number(process.env.ML_SERVICE_TIMEOUT_MS) || 8000;
 
 function toISODate(value) {
     if (!value) return null;
@@ -66,10 +62,6 @@ async function getOverspendRisk(budget, transactions, today) {
     }
 }
 
-// Score many budgets in one round trip. Returns a Map keyed by budget.id.
-// Budgets that fail to score (or if the whole service is unreachable) are
-// simply absent from the map — callers should treat a missing entry as
-// "risk unknown" and fall back accordingly.
 async function getOverspendRiskBatch(budgetsWithTransactions, today) {
     const results = new Map();
     if (!budgetsWithTransactions.length) return results;
