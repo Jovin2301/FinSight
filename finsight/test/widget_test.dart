@@ -9,8 +9,8 @@ void main() {
   setUpAll(() {
     dotenv.testLoad(
       fileInput: '''
-      API_URL=https://placeholder
-    ''',
+        API_URL=https://placeholder
+      ''',
     );
   });
 

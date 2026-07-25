@@ -716,6 +716,29 @@ class _MainScreenState extends State<MainScreen> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  void _refreshForTab(int index) {
+    switch (index) {
+      case 0: // Home
+        _loadBudgets();
+        _loadGoals();
+        _loadTransactions();
+        _loadRecurringPayments();
+        break;
+      case 1: // Transactions
+        _loadTransactions();
+        _loadRecurringPayments();
+        break;
+      case 2: // Budgets
+        _loadBudgets();
+        break;
+      case 3: // Goals
+        _loadGoals();
+        break;
+      case 4: // Profile
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
@@ -788,7 +811,10 @@ class _MainScreenState extends State<MainScreen> {
         ),
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
-          onTap: (i) => setState(() => _currentIndex = i),
+          onTap: (i) {
+            setState(() => _currentIndex = i);
+            _refreshForTab(i);
+          },
           type: BottomNavigationBarType.fixed,
           backgroundColor: Colors.white,
           selectedItemColor: AppColors.main,

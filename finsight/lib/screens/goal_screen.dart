@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../widgets/notification_bell.dart';
 import '../models/goal.dart';
+import '../constants/app_colors.dart';
 
 class GoalScreen extends StatefulWidget {
   final List<Goal> goals;
@@ -33,11 +34,6 @@ double parseAmount(dynamic value) {
 class _GoalScreenState extends State<GoalScreen> {
   List<Map<String, dynamic>> _goals = [];
   bool isLoading = true;
-
-  static const Color _tealDark = Color(0xFF2D7D7B);
-  static const Color _tealLight = Color(0xFF4AADAA);
-  static const Color _bgColor = Color(0xFFEBF0F0);
-  static const Color _inkDark = Color(0xFF1A2D3D);
 
   double get _totalSaved =>
       _goals.fold(0.0, (double s, g) => s + parseAmount(g['goalCurrentAmt']));
@@ -82,7 +78,7 @@ class _GoalScreenState extends State<GoalScreen> {
               .toList();
         });
       } else {
-        _showSnack('Failed to load goals 1(${response.statusCode})');
+        _showSnack('Failed to load goals (${response.statusCode})');
       }
     } catch (e) {
       _showSnack('Could not connect to server');
@@ -164,7 +160,7 @@ class _GoalScreenState extends State<GoalScreen> {
       } else {
         final data = _tryDecode(response.body);
         _showSnack(
-          data?['error'] ?? 'Failed to add goal 2(${response.statusCode})',
+          data?['error'] ?? 'Failed to add goal (${response.statusCode})',
         );
       }
     } catch (e) {
@@ -190,7 +186,6 @@ class _GoalScreenState extends State<GoalScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final updated = _tryDecode(response.body);
-        print(updated);
         setState(() {
           _goals[index] = updated != null
               ? Map<String, dynamic>.from(updated)
@@ -201,7 +196,7 @@ class _GoalScreenState extends State<GoalScreen> {
       } else {
         final data = _tryDecode(response.body);
         _showSnack(
-          data?['error'] ?? 'Failed to update goal 3(${response.statusCode})',
+          data?['error'] ?? 'Failed to update goal (${response.statusCode})',
         );
       }
     } catch (e) {
@@ -217,22 +212,16 @@ class _GoalScreenState extends State<GoalScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
           'Delete Goal?',
-          style: TextStyle(fontWeight: FontWeight.w700, color: _inkDark),
+          style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.text),
         ),
         content: Text(
           'Remove "${_goals[index]['goalName']}" from your goals? This cannot be undone.',
-          style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
+          style: const TextStyle(color: AppColors.muted, fontSize: 14, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -240,7 +229,7 @@ class _GoalScreenState extends State<GoalScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text("Delete"),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -267,7 +256,7 @@ class _GoalScreenState extends State<GoalScreen> {
         _showSnack('Goal deleted successfully');
       } else {
         final data = _tryDecode(response.body);
-        _showSnack(data?['error'] ?? 'Failed to delete goal 4');
+        _showSnack(data?['error'] ?? 'Failed to delete goal');
       }
     } catch (e) {
       _showSnack('Could not connect to server');
@@ -293,19 +282,9 @@ class _GoalScreenState extends State<GoalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bgColor,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: _bgColor,
-        elevation: 0,
-        title: const Text(
-          'Goals',
-          style: TextStyle(
-            color: _inkDark,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
+        title: const Text('Goals'),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 10),
@@ -316,35 +295,88 @@ class _GoalScreenState extends State<GoalScreen> {
           ),
         ],
       ),
-      floatingActionButton: GestureDetector(
-        onTap: () => _openForm(context),
-        child: Container(
-          width: 58,
-          height: 58,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [_tealDark, _tealLight],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: _tealDark.withOpacity(0.35),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'addgoal',
+        onPressed: () => _openForm(context),
+        child: const Icon(Icons.add),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: RefreshIndicator(
+          color: AppColors.main,
+          onRefresh: _loadGoals,
+          child: Column(
+            children: [
+              // ── Tip box, matching the Budgets screen style
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: AppColors.light,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _goals.isEmpty
+                          ? '🎯 Set a goal and start saving toward it today.'
+                          : '🎯 \$${_totalSaved.toStringAsFixed(2)} saved of '
+                                '\$${_totalTarget.toStringAsFixed(2)} '
+                                '(${(_overallPct * 100).toStringAsFixed(0)}%) across all goals.',
+                      style: const TextStyle(
+                        color: AppColors.text,
+                        height: 1.35,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 18),
+
+              // ── Section header, matching "Category Budgets" style
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Saving Goals',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Text(
+                    '${_goals.length} item${_goals.length == 1 ? '' : 's'}',
+                    style: const TextStyle(color: AppColors.muted),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // ── List
+              Expanded(
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _goals.isEmpty
+                    ? _buildEmpty()
+                    : ListView.builder(
+                        itemCount: _goals.length,
+                        itemBuilder: (_, index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: GoalCard(
+                              goal: Map<String, dynamic>.from(_goals[index]),
+                              onTap: () => _openForm(context, index),
+                              onDelete: () => _confirmDelete(context, index),
+                            ),
+                          );
+                        },
+                      ),
               ),
             ],
           ),
-          child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
         ),
-      ),
-      body: RefreshIndicator(
-        color: _tealDark,
-        onRefresh: _loadGoals,
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator(color: _tealDark))
-            : (_goals.isEmpty ? _buildEmpty() : _buildList(context)),
       ),
     );
   }
@@ -354,188 +386,11 @@ class _GoalScreenState extends State<GoalScreen> {
       // ListView (not Center) so RefreshIndicator's pull-to-refresh works
       // even when there are no goals yet.
       children: [
-        SizedBox(height: MediaQuery.of(context).size.height * 0.25),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE6F4F3),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: const Icon(Icons.flag_rounded, color: _tealDark, size: 40),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'No goals yet',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: _inkDark,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Tap + to set your first saving goal',
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildList(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
-      children: [
-        // ── Summary card
-        Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1E5C5A), Color(0xFF4AADAA)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: _tealDark.withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(22),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'Overall Progress',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '${_goals.length} goal${_goals.length == 1 ? '' : 's'}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                '\$${_totalSaved.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                'saved of \$${_totalTarget.toStringAsFixed(2)}',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: LinearProgressIndicator(
-                  value: _overallPct,
-                  minHeight: 8,
-                  backgroundColor: Colors.white.withOpacity(0.2),
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Budget progress',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 12,
-                    ),
-                  ),
-                  Text(
-                    '${(_overallPct * 100).toStringAsFixed(0)}% saved',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 24),
-
-        // ── Section header
-        Row(
-          children: [
-            const Text(
-              'Saving Goals',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-                color: _inkDark,
-              ),
-            ),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE6F4F3),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                '${_goals.length} goal${_goals.length == 1 ? '' : 's'}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: _tealDark,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 14),
-
-        // ── Goal cards
-        ..._goals.asMap().entries.map(
-          (e) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: GoalCard(
-              goal: Map<String, dynamic>.from(e.value),
-              onTap: () => _openForm(context, e.key),
-              onDelete: () => _confirmDelete(context, e.key),
-            ),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+        const Center(
+          child: Text(
+            'No goals yet.',
+            style: TextStyle(color: AppColors.muted),
           ),
         ),
       ],
@@ -543,7 +398,7 @@ class _GoalScreenState extends State<GoalScreen> {
   }
 }
 
-// ── Goal card
+// ── Goal card, restyled to match BudgetCard's visual language
 class GoalCard extends StatelessWidget {
   final Map<String, dynamic> goal;
   final VoidCallback onTap;
@@ -555,9 +410,6 @@ class GoalCard extends StatelessWidget {
     required this.onTap,
     required this.onDelete,
   });
-
-  static const Color _tealDark = Color(0xFF2D7D7B);
-  static const Color _inkDark = Color(0xFF1A2D3D);
 
   double get _pct {
     final target = parseAmount(goal['goalTargetAmt']);
@@ -617,16 +469,10 @@ class GoalCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
         ),
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -636,17 +482,14 @@ class GoalCard extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE6F4F3),
+                    color: AppColors.light,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                    child: Text(
-                      iconEmoji,
-                      style: const TextStyle(fontSize: 20),
-                    ),
+                    child: Text(iconEmoji, style: const TextStyle(fontSize: 20)),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -654,141 +497,112 @@ class GoalCard extends StatelessWidget {
                       Text(
                         title,
                         style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: _inkDark,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.text,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (dueDate != null) ...[
                         const SizedBox(height: 2),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today_rounded,
-                              size: 11,
-                              color: days != null && days < 0
-                                  ? Colors.red[400]
-                                  : Colors.grey[400],
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                days == null
-                                    ? _formatDate(dueDate)
-                                    : days < 0
-                                    ? 'Overdue · ${_formatDate(dueDate)}'
-                                    : days == 0
-                                    ? 'Due today'
-                                    : '$days days left · ${_formatDate(dueDate)}',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: days != null && days < 0
-                                      ? Colors.red[400]
-                                      : Colors.grey[500],
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          days == null
+                              ? _formatDate(dueDate)
+                              : days < 0
+                              ? 'Overdue · ${_formatDate(dueDate)}'
+                              : days == 0
+                              ? 'Due today'
+                              : '$days days left · ${_formatDate(dueDate)}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: days != null && days < 0
+                                ? Colors.red[400]
+                                : AppColors.muted,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
-                      const SizedBox(height: 6),
-                      _StatusPill(status: status),
                     ],
                   ),
                 ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.light,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${(_pct * 100).toStringAsFixed(0)}%',
+                    style: const TextStyle(
+                      color: AppColors.main,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 8),
-                GestureDetector(
+                InkWell(
                   onTap: onDelete,
+                  borderRadius: BorderRadius.circular(10),
                   child: Container(
-                    width: 32,
-                    height: 32,
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(9),
+                      color: Colors.red.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
                       Icons.delete_outline_rounded,
                       color: Colors.red,
-                      size: 17,
+                      size: 18,
                     ),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 6),
+            _StatusPill(status: status),
             const SizedBox(height: 14),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Saved',
-                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '\$${current.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: _tealDark,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Saved',
+                  style: TextStyle(fontSize: 12, color: AppColors.muted),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Target',
-                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '\$${target.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: _inkDark,
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Target',
+                  style: TextStyle(fontSize: 12, color: AppColors.muted),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '\$${current.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.main,
                   ),
-                  decoration: BoxDecoration(
-                    color: _pct >= 1.0
-                        ? const Color(0xFFD0F0EE)
-                        : const Color(0xFFE6F4F3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    '${(_pct * 100).toStringAsFixed(0)}%',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: _pct >= 1.0 ? const Color(0xFF1A6B68) : _tealDark,
-                    ),
+                ),
+                Text(
+                  '\$${target.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.text,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: LinearProgressIndicator(
                 value: _pct,
                 minHeight: 8,
-                backgroundColor: const Color(0xFFE6F4F3),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  _pct >= 1.0 ? const Color(0xFF1A6B68) : _tealDark,
-                ),
+                backgroundColor: AppColors.light,
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.main),
               ),
             ),
             if (_pct >= 1.0) ...[
@@ -797,7 +611,7 @@ class GoalCard extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD0F0EE),
+                  color: AppColors.light,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Center(
@@ -805,8 +619,8 @@ class GoalCard extends StatelessWidget {
                     '🎉 Goal reached!',
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A6B68),
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.main,
                     ),
                   ),
                 ),
@@ -819,7 +633,7 @@ class GoalCard extends StatelessWidget {
   }
 }
 
-// ── Status pill widget ─────────────────────────────────────────
+// ── Status pill widget
 class _StatusPill extends StatelessWidget {
   final GoalStatus status;
   const _StatusPill({required this.status});
@@ -872,9 +686,6 @@ class _GoalFormSheet extends StatefulWidget {
 }
 
 class _GoalFormSheetState extends State<_GoalFormSheet> {
-  static const Color _tealDark = Color(0xFF2D7D7B);
-  static const Color _inkDark = Color(0xFF1A2D3D);
-
   late DateTime? _dueDate;
   late GoalStatus _status;
   late String _selectedEmoji;
@@ -929,10 +740,10 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: const ColorScheme.light(
-            primary: _tealDark,
+            primary: AppColors.main,
             onPrimary: Colors.white,
             surface: Colors.white,
-            onSurface: _inkDark,
+            onSurface: AppColors.text,
           ),
         ),
         child: child!,
@@ -1008,12 +819,12 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE6F4F3),
+                    color: AppColors.light,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.flag_rounded,
-                    color: _tealDark,
+                    color: AppColors.main,
                     size: 20,
                   ),
                 ),
@@ -1023,7 +834,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: _inkDark,
+                    color: AppColors.text,
                   ),
                 ),
                 const Spacer(),
@@ -1033,12 +844,12 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                     width: 32,
                     height: 32,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEBF0F0),
+                      color: AppColors.light,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
                       Icons.close_rounded,
-                      color: Color(0xFF1A2D3D),
+                      color: AppColors.text,
                       size: 18,
                     ),
                   ),
@@ -1052,7 +863,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
               onTap: () => setState(() => _showIconPicker = !_showIconPicker),
               child: Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEBF0F0),
+                  color: AppColors.light,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 padding: const EdgeInsets.symmetric(
@@ -1065,7 +876,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE6F4F3),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
@@ -1085,7 +896,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: _inkDark,
+                        color: AppColors.text,
                       ),
                     ),
                     const Spacer(),
@@ -1094,7 +905,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                       duration: const Duration(milliseconds: 200),
                       child: const Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: _tealDark,
+                        color: AppColors.main,
                         size: 22,
                       ),
                     ),
@@ -1108,7 +919,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                 margin: const EdgeInsets.only(top: 8),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEBF0F0),
+                  color: AppColors.light,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: GridView.count(
@@ -1128,12 +939,12 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 150),
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFFE6F4F3)
-                              : Colors.white,
+                          color: isSelected ? Colors.white : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected ? _tealDark : Colors.transparent,
+                            color: isSelected
+                                ? AppColors.main
+                                : Colors.transparent,
                             width: 2,
                           ),
                         ),
@@ -1147,8 +958,8 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                               style: TextStyle(
                                 fontSize: 9,
                                 color: isSelected
-                                    ? _tealDark
-                                    : Colors.grey[500],
+                                    ? AppColors.main
+                                    : AppColors.muted,
                                 fontWeight: isSelected
                                     ? FontWeight.w700
                                     : FontWeight.w500,
@@ -1204,7 +1015,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                     onTap: _pickDate,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFEBF0F0),
+                        color: AppColors.light,
                         borderRadius: BorderRadius.circular(14),
                       ),
                       padding: const EdgeInsets.symmetric(
@@ -1215,7 +1026,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                         children: [
                           const Icon(
                             Icons.calendar_today_rounded,
-                            color: _tealDark,
+                            color: AppColors.main,
                             size: 20,
                           ),
                           const SizedBox(width: 12),
@@ -1227,8 +1038,8 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                               color: _dueDate != null
-                                  ? _inkDark
-                                  : Colors.grey[400],
+                                  ? AppColors.text
+                                  : AppColors.muted,
                             ),
                           ),
                         ],
@@ -1244,7 +1055,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                       width: 46,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.08),
+                        color: Colors.red.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: const Icon(
@@ -1274,7 +1085,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                       vertical: 9,
                     ),
                     decoration: BoxDecoration(
-                      color: isSelected ? s.bg : const Color(0xFFEBF0F0),
+                      color: isSelected ? s.bg : AppColors.light,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
                         color: isSelected ? s.color : Colors.transparent,
@@ -1287,7 +1098,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                         Icon(
                           s.icon,
                           size: 13,
-                          color: isSelected ? s.color : Colors.grey[500],
+                          color: isSelected ? s.color : AppColors.muted,
                         ),
                         const SizedBox(width: 5),
                         Text(
@@ -1295,7 +1106,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: isSelected ? s.color : Colors.grey[500],
+                            color: isSelected ? s.color : AppColors.muted,
                           ),
                         ),
                       ],
@@ -1313,7 +1124,7 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                   vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.08),
+                  color: Colors.red.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -1339,34 +1150,22 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
               ),
             ],
             const SizedBox(height: 28),
-            GestureDetector(
-              onTap: _submit,
-              child: Container(
-                width: double.infinity,
-                height: 56,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2D7D7B), Color(0xFF4AADAA)],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _submit,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.main,
+                  minimumSize: const Size(0, 56),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
                   ),
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _tealDark.withOpacity(0.3),
-                      blurRadius: 14,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
                 ),
-                child: Center(
-                  child: Text(
-                    widget.isEdit ? 'Save Changes' : 'Add Goal',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                child: Text(
+                  widget.isEdit ? 'Save Changes' : 'Add Goal',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -1387,10 +1186,10 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: Colors.grey[600],
+        color: AppColors.muted,
       ),
     );
   }
@@ -1419,16 +1218,16 @@ class _SheetField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Colors.grey[600],
+            color: AppColors.muted,
           ),
         ),
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFEBF0F0),
+            color: AppColors.light,
             borderRadius: BorderRadius.circular(14),
           ),
           child: TextField(
@@ -1437,12 +1236,12 @@ class _SheetField extends StatelessWidget {
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1A2D3D),
+              color: AppColors.text,
             ),
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: const Color(0xFF2D7D7B), size: 20),
+              prefixIcon: Icon(icon, color: AppColors.main, size: 20),
               hintText: hint,
-              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),
+              hintStyle: const TextStyle(color: AppColors.muted, fontSize: 15),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(vertical: 16),
             ),
@@ -1502,26 +1301,26 @@ extension GoalStatusExt on GoalStatus {
   Color get color {
     switch (this) {
       case GoalStatus.onTrack:
-        return const Color(0xFF2D7D7B);
+        return AppColors.main;
       case GoalStatus.atRisk:
         return const Color(0xFFE07B39);
       case GoalStatus.paused:
-        return const Color(0xFF8A94A6);
+        return AppColors.muted;
       case GoalStatus.completed:
-        return const Color(0xFF1A6B68);
+        return AppColors.main;
     }
   }
 
   Color get bg {
     switch (this) {
       case GoalStatus.onTrack:
-        return const Color(0xFFE6F4F3);
+        return AppColors.light;
       case GoalStatus.atRisk:
         return const Color(0xFFFFF0E8);
       case GoalStatus.paused:
         return const Color(0xFFF0F1F4);
       case GoalStatus.completed:
-        return const Color(0xFFD0F0EE);
+        return AppColors.light;
     }
   }
 
