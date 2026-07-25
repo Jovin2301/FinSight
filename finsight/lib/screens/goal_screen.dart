@@ -216,7 +216,11 @@ class _GoalScreenState extends State<GoalScreen> {
         ),
         content: Text(
           'Remove "${_goals[index]['goalName']}" from your goals? This cannot be undone.',
-          style: const TextStyle(color: AppColors.muted, fontSize: 14, height: 1.5),
+          style: const TextStyle(
+            color: AppColors.muted,
+            fontSize: 14,
+            height: 1.5,
+          ),
         ),
         actions: [
           TextButton(
@@ -343,7 +347,10 @@ class _GoalScreenState extends State<GoalScreen> {
                   const Expanded(
                     child: Text(
                       'Saving Goals',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Text(
@@ -486,7 +493,10 @@ class GoalCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                    child: Text(iconEmoji, style: const TextStyle(fontSize: 20)),
+                    child: Text(
+                      iconEmoji,
+                      style: const TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -526,7 +536,10 @@ class GoalCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.light,
                     borderRadius: BorderRadius.circular(20),
