@@ -26,7 +26,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   static const bool _previewBudgetPage = false;
-  
+
   int _currentIndex = 0;
   bool _loadingBudgets = false;
   List<String> _budgetCategories = [];
@@ -576,7 +576,6 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-
   Future<void> _loadGoals() async {
     if (context.read<AuthProvider>().token == null) return;
     try {
@@ -588,20 +587,19 @@ class _MainScreenState extends State<MainScreen> {
         final data = jsonDecode(response.body) as List;
         if (!mounted) return;
         setState(() {
-            _goals
+          _goals
             ..clear()
             ..addAll(data.map((item) => Goal.fromJson(item)));
         });
-      } else {  // add this temporarily
+      } else {
+        // add this temporarily
         _showMessage('response ${response.statusCode}');
       }
-
     } catch (e) {
-      print('Goal load error: ${e.toString()}');   // add this temporarily
+      print('Goal load error: ${e.toString()}'); // add this temporarily
       _showMessage('Could not load goals');
-   }
+    }
   }
-
 
   void _addBudget(Budget budget) async {
     if (_previewBudgetPage) {
@@ -766,7 +764,7 @@ class _MainScreenState extends State<MainScreen> {
         unreadNotifications: _unreadNotifications,
         onNotificationsTap: _openNotifications,
       ),
-      
+
       // Profile
       ProfileScreen(
         unreadNotifications: _unreadNotifications,

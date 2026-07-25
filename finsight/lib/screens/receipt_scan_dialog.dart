@@ -123,7 +123,9 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
       setState(() => _scanStatus = 'Receipt text extracted');
     } catch (error) {
       debugPrint('Mobile receipt scan error: $error');
-      setState(() => _scanStatus = 'Could not read receipt. Try a clearer image.');
+      setState(
+        () => _scanStatus = 'Could not read receipt. Try a clearer image.',
+      );
     } finally {
       await textRecognizer.close();
     }
@@ -141,11 +143,7 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
       );
 
       request.files.add(
-        http.MultipartFile.fromBytes(
-          'receipt',
-          imageBytes,
-          filename: fileName,
-        ),
+        http.MultipartFile.fromBytes('receipt', imageBytes, filename: fileName),
       );
 
       final response = await request.send();
@@ -153,7 +151,9 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
 
       if (response.statusCode != 200) {
         debugPrint('Desktop receipt scan failed: $body');
-        setState(() => _scanStatus = 'Could not scan receipt. Try a clearer image.');
+        setState(
+          () => _scanStatus = 'Could not scan receipt. Try a clearer image.',
+        );
         return;
       }
 
@@ -261,8 +261,9 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
       final lowerLine = line.toLowerCase();
       final hasNumber = RegExp(r'\d').hasMatch(line);
       final hasAmount = RegExp(r'\d+\.\d{2}').hasMatch(line);
-      final hasDate = RegExp(r'\d{1,4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,4}')
-          .hasMatch(line);
+      final hasDate = RegExp(
+        r'\d{1,4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,4}',
+      ).hasMatch(line);
       final shouldIgnore = ignoredWords.any(lowerLine.contains);
       final tooShort = line.replaceAll(RegExp(r'[^A-Za-z]'), '').length < 3;
 
@@ -307,18 +308,19 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
   }
 
   double? _lastAmountInText(String text) {
-    final matches = RegExp(r'(?:\$|sgd|s\$)?\s*(\d{1,4}(?:,\d{3})*\.\d{2})',
-            caseSensitive: false)
-        .allMatches(text)
-        .toList();
+    final matches = RegExp(
+      r'(?:\$|sgd|s\$)?\s*(\d{1,4}(?:,\d{3})*\.\d{2})',
+      caseSensitive: false,
+    ).allMatches(text).toList();
     if (matches.isEmpty) return null;
 
     return double.tryParse(matches.last.group(1)!.replaceAll(',', ''));
   }
 
   DateTime? _findDate(String text) {
-    final dayFirst = RegExp(r'(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})')
-        .firstMatch(text);
+    final dayFirst = RegExp(
+      r'(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})',
+    ).firstMatch(text);
     if (dayFirst != null) {
       final day = int.tryParse(dayFirst.group(1)!);
       final month = int.tryParse(dayFirst.group(2)!);
@@ -328,8 +330,9 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
       }
     }
 
-    final yearFirst = RegExp(r'(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})')
-        .firstMatch(text);
+    final yearFirst = RegExp(
+      r'(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})',
+    ).firstMatch(text);
     if (yearFirst != null) {
       final year = int.tryParse(yearFirst.group(1)!);
       final month = int.tryParse(yearFirst.group(2)!);
@@ -744,10 +747,7 @@ class _ReceiptScanDialogState extends State<ReceiptScanDialog> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withAlpha(85),
-                  ],
+                  colors: [Colors.transparent, Colors.black.withAlpha(85)],
                 ),
               ),
             ),

@@ -60,8 +60,7 @@ class FinSightApp extends StatelessWidget {
         inputDecorationTheme: const InputDecorationTheme(
           filled: true,
           fillColor: AppColors.lightMint,
-          contentPadding:
-              EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(16)),
             borderSide: BorderSide(color: AppColors.softBorder),
@@ -72,8 +71,7 @@ class FinSightApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(16)),
-            borderSide:
-                BorderSide(color: AppColors.primaryTeal, width: 2),
+            borderSide: BorderSide(color: AppColors.primaryTeal, width: 2),
           ),
         ),
 

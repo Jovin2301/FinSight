@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/help_center_widget.dart';
 
-
 class FinancialDataScreen extends StatelessWidget {
   const FinancialDataScreen({super.key});
 
@@ -50,18 +49,23 @@ class FinancialDataScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Financial Data',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1A1A1A))),
+                      const Text(
+                        'Financial Data',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text(
-                          'Track, import, and manage your income and expenses.',
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                              height: 1.4)),
+                        'Track, import, and manage your income and expenses.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                          height: 1.4,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -72,40 +76,54 @@ class FinancialDataScreen extends StatelessWidget {
 
           const SectionLabel(text: 'Adding Transactions'),
           const StepTile(
-              step: 1,
-              title: 'Tap the + button',
-              body: 'Found at the bottom centre of the Home or Transactions screen.'),
+            step: 1,
+            title: 'Tap the + button',
+            body:
+                'Found at the bottom centre of the Home or Transactions screen.',
+          ),
           const SizedBox(height: 10),
           const StepTile(
-              step: 2,
-              title: 'Choose type',
-              body: 'Select Expense, Income, or Transfer between your accounts.'),
+            step: 2,
+            title: 'Choose type',
+            body: 'Select Expense, Income, or Transfer between your accounts.',
+          ),
           const SizedBox(height: 10),
           const StepTile(
-              step: 3,
-              title: 'Fill in details',
-              body:
-                  'Enter amount, pick a category, set the date, and add an optional note or receipt photo.'),
+            step: 3,
+            title: 'Fill in details',
+            body:
+                'Enter amount, pick a category, set the date, and add an optional note or receipt photo.',
+          ),
           const SizedBox(height: 10),
           const StepTile(
-              step: 4,
-              title: 'Save',
-              body:
-                  'The transaction appears instantly in your timeline and updates your balance.'),
+            step: 4,
+            title: 'Save',
+            body:
+                'The transaction appears instantly in your timeline and updates your balance.',
+          ),
           const SizedBox(height: 20),
 
           const SectionLabel(text: 'Supported Data Types'),
           HelpCard(
             child: Column(
               children: [
-                _dataRow(Icons.arrow_downward_rounded, 'Expenses',
-                    'Money going out — bills, purchases, subscriptions'),
+                _dataRow(
+                  Icons.arrow_downward_rounded,
+                  'Expenses',
+                  'Money going out — bills, purchases, subscriptions',
+                ),
                 const Divider(height: 20),
-                _dataRow(Icons.arrow_upward_rounded, 'Income',
-                    'Salary, allowance, freelance, gifts'),
+                _dataRow(
+                  Icons.arrow_upward_rounded,
+                  'Income',
+                  'Salary, allowance, freelance, gifts',
+                ),
                 const Divider(height: 20),
-                _dataRow(Icons.swap_horiz_rounded, 'Transfers',
-                    'Between your own accounts — won\'t affect net balance'),
+                _dataRow(
+                  Icons.swap_horiz_rounded,
+                  'Transfers',
+                  'Between your own accounts — won\'t affect net balance',
+                ),
               ],
             ),
           ),
@@ -122,8 +140,9 @@ class FinancialDataScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           const InfoBanner(
-              text:
-                  'FinSight stores all data locally and in your secure cloud account. We never sell your financial data.'),
+            text:
+                'FinSight stores all data locally and in your secure cloud account. We never sell your financial data.',
+          ),
         ],
       ),
     );
@@ -136,7 +155,9 @@ class FinancialDataScreen extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-              color: tealLight, borderRadius: BorderRadius.circular(10)),
+            color: tealLight,
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Icon(icon, color: tealDark, size: 18),
         ),
         const SizedBox(width: 12),
@@ -144,14 +165,19 @@ class FinancialDataScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A1A1A))),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
               const SizedBox(height: 2),
-              Text(subtitle,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+              Text(
+                subtitle,
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              ),
             ],
           ),
         ),

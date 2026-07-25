@@ -69,7 +69,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       );
 
-
       if (response.statusCode == 201) {
         final prefs = jsonDecode(response.body);
 

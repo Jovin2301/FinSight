@@ -105,11 +105,7 @@ class _BillScanDialogState extends State<BillScanDialog> {
       );
 
       request.files.add(
-        http.MultipartFile.fromBytes(
-          'receipt',
-          imageBytes,
-          filename: fileName,
-        ),
+        http.MultipartFile.fromBytes('receipt', imageBytes, filename: fileName),
       );
 
       final response = await request.send();
@@ -117,7 +113,9 @@ class _BillScanDialogState extends State<BillScanDialog> {
 
       if (response.statusCode != 200) {
         debugPrint('Desktop bill scan failed: $body');
-        setState(() => _scanStatus = 'Could not scan bill. Try a clearer image.');
+        setState(
+          () => _scanStatus = 'Could not scan bill. Try a clearer image.',
+        );
         return;
       }
 
@@ -241,7 +239,8 @@ class _BillScanDialogState extends State<BillScanDialog> {
       final hasAmount = _amountsFromText(line).isNotEmpty;
       final hasDate = _dateFromText(line) != null;
       final shouldIgnore = ignoredWords.any(lowerLine.contains);
-      final enoughLetters = line.replaceAll(RegExp(r'[^A-Za-z]'), '').length >= 3;
+      final enoughLetters =
+          line.replaceAll(RegExp(r'[^A-Za-z]'), '').length >= 3;
       final tooManyNumbers = RegExp(r'\d').allMatches(line).length > 4;
 
       if (!hasAmount &&
@@ -277,11 +276,7 @@ class _BillScanDialogState extends State<BillScanDialog> {
       'subscription fee',
       'grand total',
     ];
-    final normalAmountWords = [
-      'total',
-      'charged',
-      'paid',
-    ];
+    final normalAmountWords = ['total', 'charged', 'paid'];
     final skipWords = [
       'previous balance',
       'outstanding',
@@ -315,9 +310,9 @@ class _BillScanDialogState extends State<BillScanDialog> {
       if (amount != null) return amount;
     }
 
-    final amounts = _amountsFromText(text)
-        .where((amount) => amount > 0 && amount < 10000)
-        .toList();
+    final amounts = _amountsFromText(
+      text,
+    ).where((amount) => amount > 0 && amount < 10000).toList();
     if (amounts.isEmpty) return null;
 
     amounts.sort();
@@ -366,8 +361,9 @@ class _BillScanDialogState extends State<BillScanDialog> {
   }
 
   DateTime? _dateFromText(String text) {
-    final dayFirst = RegExp(r'(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})')
-        .firstMatch(text);
+    final dayFirst = RegExp(
+      r'(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})',
+    ).firstMatch(text);
     if (dayFirst != null) {
       final day = int.tryParse(dayFirst.group(1)!);
       final month = int.tryParse(dayFirst.group(2)!);
@@ -377,8 +373,9 @@ class _BillScanDialogState extends State<BillScanDialog> {
       }
     }
 
-    final yearFirst = RegExp(r'(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})')
-        .firstMatch(text);
+    final yearFirst = RegExp(
+      r'(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})',
+    ).firstMatch(text);
     if (yearFirst != null) {
       final year = int.tryParse(yearFirst.group(1)!);
       final month = int.tryParse(yearFirst.group(2)!);
@@ -600,7 +597,10 @@ class _BillScanDialogState extends State<BillScanDialog> {
               color: AppColors.light,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.event_repeat_outlined, color: AppColors.main),
+            child: const Icon(
+              Icons.event_repeat_outlined,
+              color: AppColors.main,
+            ),
           ),
           const SizedBox(width: 12),
           const Expanded(

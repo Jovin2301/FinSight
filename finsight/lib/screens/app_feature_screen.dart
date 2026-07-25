@@ -60,17 +60,23 @@ class AppFeaturesScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('App Features',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1A1A1A))),
+                      const Text(
+                        'App Features',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text('Everything FinSight can do for your finances.',
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                              height: 1.4)),
+                      Text(
+                        'Everything FinSight can do for your finances.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                          height: 1.4,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -80,44 +86,56 @@ class AppFeaturesScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           const SectionLabel(text: 'What\'s Inside FinSight'),
-          ..._features.map((f) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: HelpCard(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                            color: tealLight,
-                            borderRadius: BorderRadius.circular(12)),
-                        child: Icon(f['icon'] as IconData,
-                            color: tealDark, size: 20),
+          ..._features.map(
+            (f) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: HelpCard(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: tealLight,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(f['title'] as String,
-                                style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF1A1A1A))),
-                            const SizedBox(height: 4),
-                            Text(f['body'] as String,
-                                style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey[600],
-                                    height: 1.5)),
-                          ],
-                        ),
+                      child: Icon(
+                        f['icon'] as IconData,
+                        color: tealDark,
+                        size: 20,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            f['title'] as String,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1A1A1A),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            f['body'] as String,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey[600],
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              )),
+              ),
+            ),
+          ),
           const SizedBox(height: 10),
 
           const SectionLabel(text: 'Budget vs Savings Goals'),
@@ -125,30 +143,26 @@ class AppFeaturesScreen extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: _comparisonCol(
-                    'Budget',
-                    tealDark,
-                    [
-                      'Monthly spending cap',
-                      'Per-category limits',
-                      'Resets each month',
-                      'Alerts when near limit',
-                    ],
-                  ),
+                  child: _comparisonCol('Budget', tealDark, [
+                    'Monthly spending cap',
+                    'Per-category limits',
+                    'Resets each month',
+                    'Alerts when near limit',
+                  ]),
                 ),
                 Container(
-                    width: 1, height: 130, color: const Color(0xFFEBF0F0)),
+                  width: 1,
+                  height: 130,
+                  color: const Color(0xFFEBF0F0),
+                ),
                 Expanded(
-                  child: _comparisonCol(
-                    'Savings Goal',
-                    const Color(0xFF6B5CE7),
-                    [
-                      'Target amount to reach',
-                      'No time pressure',
-                      'Track contributions',
-                      'Progress bar & milestones',
-                    ],
-                  ),
+                  child:
+                      _comparisonCol('Savings Goal', const Color(0xFF6B5CE7), [
+                        'Target amount to reach',
+                        'No time pressure',
+                        'Track contributions',
+                        'Progress bar & milestones',
+                      ]),
                 ),
               ],
             ),
@@ -156,8 +170,9 @@ class AppFeaturesScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           const InfoBanner(
-              text:
-                  'New features are added regularly. Update the app to get the latest improvements.'),
+            text:
+                'New features are added regularly. Update the app to get the latest improvements.',
+          ),
         ],
       ),
     );
@@ -172,33 +187,45 @@ class AppFeaturesScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(8)),
-            child: Text(label,
-                style: TextStyle(
-                    fontSize: 12, fontWeight: FontWeight.w700, color: color)),
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
           ),
           const SizedBox(height: 10),
-          ...points.map((p) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 6),
-                      width: 4,
-                      height: 4,
-                      decoration:
-                          BoxDecoration(color: color, shape: BoxShape.circle),
+          ...points.map(
+            (p) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 6),
+                    width: 4,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(width: 7),
-                    Expanded(
-                        child: Text(p,
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.grey[600]))),
-                  ],
-                ),
-              )),
+                  ),
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: Text(
+                      p,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

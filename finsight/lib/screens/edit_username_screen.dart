@@ -79,7 +79,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
         body: jsonEncode({
           'username': _usernameController.text.trim(),
           'email': _emailController.text.trim(),
-          'userid': user?['id']
+          'userid': user?['id'],
         }),
       );
 
@@ -89,7 +89,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
         // Update local provider
         authProvider.updateUser({
           'username': updatedUser?['userName'],
-          'email': updatedUser?['userEmail']
+          'email': updatedUser?['userEmail'],
         });
         print('Updated user keys: ${updatedUser.keys}');
 
@@ -98,19 +98,15 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated successfully'),
-          ),
+          const SnackBar(content: Text('Profile updated successfully')),
         );
       } else {
         throw Exception('Failed to update profile');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       setState(() => _isSaving = false);
     }
@@ -141,8 +137,11 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                 ),
               ],
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: _tealDark, size: 18),
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: _tealDark,
+              size: 18,
+            ),
           ),
         ),
         title: const Text(
@@ -164,8 +163,10 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
               },
               child: Container(
                 margin: const EdgeInsets.all(8),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
@@ -173,9 +174,10 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                 child: Text(
                   'Reset',
                   style: TextStyle(
-                      color: Colors.deepOrangeAccent[500],
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600),
+                    color: Colors.deepOrangeAccent[500],
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -221,7 +223,6 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                       ),
                     ),
                   ),
-                  
                 ],
               ),
             ),
@@ -254,8 +255,9 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                   controller: _usernameController,
                   icon: Icons.person_rounded,
                   hint: 'Enter your username',
-                  validator: (v) =>
-                      (v == null || v.trim().isEmpty) ? 'Username is required' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty)
+                      ? 'Username is required'
+                      : null,
                 ),
                 const _Divider(),
                 _FieldItem(
@@ -265,11 +267,12 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                   hint: 'Enter your email',
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty) return 'Email is required';
+                    if (v == null || v.trim().isEmpty)
+                      return 'Email is required';
                     if (!v.contains('@')) return 'Enter a valid email';
                     return null;
                   },
-                )
+                ),
               ],
             ),
 
@@ -347,14 +350,13 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                   },
                 ),
                 const _Divider(),
-              ]
-            )
+              ],
+            ),
           ],
         ),
       ),
     );
   }
-
 }
 
 // ── Section card wrapper ──────────────────────────────────────
@@ -457,11 +459,13 @@ class _FieldItem extends StatelessWidget {
                   ),
                   decoration: InputDecoration(
                     hintText: hint,
-                    hintStyle:
-                        TextStyle(color: Colors.grey[400], fontSize: 14),
+                    hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
                     border: InputBorder.none,
                     isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 5,
+                    ),
                   ),
                 ),
               ],
@@ -510,8 +514,11 @@ class _ActionRow extends StatelessWidget {
                 color: (iconColor ?? const Color(0xFF2D7D7B)).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon,
-                  color: iconColor ?? const Color(0xFF2D7D7B), size: 18),
+              child: Icon(
+                icon,
+                color: iconColor ?? const Color(0xFF2D7D7B),
+                size: 18,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -525,8 +532,11 @@ class _ActionRow extends StatelessWidget {
               ),
             ),
             trailing ??
-                Icon(Icons.chevron_right_rounded,
-                    color: Colors.grey[300], size: 22),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.grey[300],
+                  size: 22,
+                ),
           ],
         ),
       ),
@@ -540,6 +550,10 @@ class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Divider(
-        height: 1, thickness: 1, color: Color(0xFFF0F4F4), indent: 64);
+      height: 1,
+      thickness: 1,
+      color: Color(0xFFF0F4F4),
+      indent: 64,
+    );
   }
 }

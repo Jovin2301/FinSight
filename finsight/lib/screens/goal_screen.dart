@@ -34,24 +34,19 @@ class _GoalScreenState extends State<GoalScreen> {
   List<Map<String, dynamic>> _goals = [];
   bool isLoading = true;
 
-  static const Color _tealDark  = Color(0xFF2D7D7B);
+  static const Color _tealDark = Color(0xFF2D7D7B);
   static const Color _tealLight = Color(0xFF4AADAA);
-  static const Color _bgColor   = Color(0xFFEBF0F0);
-  static const Color _inkDark   = Color(0xFF1A2D3D);
+  static const Color _bgColor = Color(0xFFEBF0F0);
+  static const Color _inkDark = Color(0xFF1A2D3D);
 
-  double get _totalSaved => _goals.fold(
-    0.0,
-    (double s, g) => s + parseAmount(g['goalCurrentAmt']),
-  );
- 
-  double get _totalTarget => _goals.fold(
-    0.0,
-    (double s, g) => s + parseAmount(g['goalTargetAmt']),
-  );
- 
+  double get _totalSaved =>
+      _goals.fold(0.0, (double s, g) => s + parseAmount(g['goalCurrentAmt']));
+
+  double get _totalTarget =>
+      _goals.fold(0.0, (double s, g) => s + parseAmount(g['goalTargetAmt']));
+
   double get _overallPct =>
       _totalTarget == 0 ? 0 : (_totalSaved / _totalTarget).clamp(0.0, 1.0);
- 
 
   @override
   void initState() {
@@ -61,13 +56,13 @@ class _GoalScreenState extends State<GoalScreen> {
     });
   }
 
-  // ── READ 
+  // ── READ
   Future<void> _loadGoals() async {
     setState(() => isLoading = true);
 
     try {
       final authProvider = context.read<AuthProvider>();
-      
+
       final response = await http.get(
         Uri.parse('${dotenv.env['BASE_URL']}/user/getSavingGoal'),
         headers: {
@@ -75,7 +70,6 @@ class _GoalScreenState extends State<GoalScreen> {
           'Content-Type': 'application/json',
         },
       );
-
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -99,19 +93,20 @@ class _GoalScreenState extends State<GoalScreen> {
 
   // ── CREATE / EDIT entry point
   Future<void> _openForm(BuildContext context, [int? index]) async {
-    final Map<String, dynamic>? goalToEdit =
-        index == null ? null : Map<String, dynamic>.from(_goals[index]);
- 
+    final Map<String, dynamic>? goalToEdit = index == null
+        ? null
+        : Map<String, dynamic>.from(_goals[index]);
+
     final titleController = TextEditingController(
       text: goalToEdit?['goalName']?.toString() ?? '',
     );
- 
+
     final targetController = TextEditingController(
       text: goalToEdit == null
           ? ''
           : parseAmount(goalToEdit['goalTargetAmt']).toStringAsFixed(2),
     );
- 
+
     final savedController = TextEditingController(
       text: goalToEdit == null
           ? ''
@@ -144,7 +139,7 @@ class _GoalScreenState extends State<GoalScreen> {
     }
   }
 
-  // ── CREATE 
+  // ── CREATE
   Future<void> _createGoal(Map<String, dynamic> goal) async {
     try {
       final auth = context.read<AuthProvider>();
@@ -160,7 +155,7 @@ class _GoalScreenState extends State<GoalScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final created = jsonDecode(response.body);
-        
+
         setState(() {
           _goals.add(Map<String, dynamic>.from(created as Map));
         });
@@ -168,14 +163,16 @@ class _GoalScreenState extends State<GoalScreen> {
         _showSnack('Goal added successfully');
       } else {
         final data = _tryDecode(response.body);
-        _showSnack(data?['error'] ?? 'Failed to add goal 2(${response.statusCode})');
+        _showSnack(
+          data?['error'] ?? 'Failed to add goal 2(${response.statusCode})',
+        );
       }
     } catch (e) {
       _showSnack('Could not connect to server');
     }
   }
 
-  // ── UPDATE 
+  // ── UPDATE
   Future<void> _updateGoal(Map<String, dynamic> goalList, int index) async {
     try {
       final auth = context.read<AuthProvider>();
@@ -203,7 +200,9 @@ class _GoalScreenState extends State<GoalScreen> {
         _showSnack('Goal updated successfully');
       } else {
         final data = _tryDecode(response.body);
-        _showSnack(data?['error'] ?? 'Failed to update goal 3(${response.statusCode})');
+        _showSnack(
+          data?['error'] ?? 'Failed to update goal 3(${response.statusCode})',
+        );
       }
     } catch (e) {
       _showSnack('Could not connect to server');
@@ -215,9 +214,7 @@ class _GoalScreenState extends State<GoalScreen> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
           'Delete Goal?',
           style: TextStyle(fontWeight: FontWeight.w700, color: _inkDark),
@@ -231,7 +228,10 @@ class _GoalScreenState extends State<GoalScreen> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
           ElevatedButton(
@@ -274,7 +274,7 @@ class _GoalScreenState extends State<GoalScreen> {
     }
   }
 
-  // ── helpers 
+  // ── helpers
   Map<String, dynamic>? _tryDecode(String body) {
     try {
       return Map<String, dynamic>.from(jsonDecode(body) as Map);
@@ -285,9 +285,9 @@ class _GoalScreenState extends State<GoalScreen> {
 
   void _showSnack(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -299,7 +299,11 @@ class _GoalScreenState extends State<GoalScreen> {
         elevation: 0,
         title: const Text(
           'Goals',
-          style: TextStyle(color: _inkDark, fontSize: 18, fontWeight: FontWeight.w700),
+          style: TextStyle(
+            color: _inkDark,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         centerTitle: true,
         actions: [
@@ -364,11 +368,19 @@ class _GoalScreenState extends State<GoalScreen> {
               child: const Icon(Icons.flag_rounded, color: _tealDark, size: 40),
             ),
             const SizedBox(height: 20),
-            const Text('No goals yet',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: _inkDark)),
+            const Text(
+              'No goals yet',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: _inkDark,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text('Tap + to set your first saving goal',
-                style: TextStyle(fontSize: 14, color: Colors.grey[500])),
+            Text(
+              'Tap + to set your first saving goal',
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            ),
           ],
         ),
       ],
@@ -405,18 +417,28 @@ class _GoalScreenState extends State<GoalScreen> {
                   Text(
                     'Overall Progress',
                     style: TextStyle(
-                        color: Colors.white.withOpacity(0.8), fontSize: 13, fontWeight: FontWeight.w500),
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       '${_goals.length} goal${_goals.length == 1 ? '' : 's'}',
-                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -424,11 +446,18 @@ class _GoalScreenState extends State<GoalScreen> {
               const SizedBox(height: 10),
               Text(
                 '\$${_totalSaved.toStringAsFixed(2)}',
-                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w700),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               Text(
                 'saved of \$${_totalTarget.toStringAsFixed(2)}',
-                style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13),
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.7),
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 16),
               ClipRRect(
@@ -444,10 +473,20 @@ class _GoalScreenState extends State<GoalScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Budget progress', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12)),
+                  Text(
+                    'Budget progress',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 12,
+                    ),
+                  ),
                   Text(
                     '${(_overallPct * 100).toStringAsFixed(0)}% saved',
-                    style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ],
               ),
@@ -462,7 +501,11 @@ class _GoalScreenState extends State<GoalScreen> {
           children: [
             const Text(
               'Saving Goals',
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: _inkDark),
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: _inkDark,
+              ),
             ),
             const Spacer(),
             Container(
@@ -473,7 +516,11 @@ class _GoalScreenState extends State<GoalScreen> {
               ),
               child: Text(
                 '${_goals.length} goal${_goals.length == 1 ? '' : 's'}',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _tealDark),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: _tealDark,
+                ),
               ),
             ),
           ],
@@ -482,54 +529,64 @@ class _GoalScreenState extends State<GoalScreen> {
 
         // ── Goal cards
         ..._goals.asMap().entries.map(
-              (e) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: GoalCard(
-                  goal: Map<String, dynamic>.from(e.value),
-                  onTap: () => _openForm(context, e.key),
-                  onDelete: () => _confirmDelete(context, e.key),
-                ),
-              ),
+          (e) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: GoalCard(
+              goal: Map<String, dynamic>.from(e.value),
+              onTap: () => _openForm(context, e.key),
+              onDelete: () => _confirmDelete(context, e.key),
             ),
+          ),
+        ),
       ],
     );
   }
 }
 
-// ── Goal card 
+// ── Goal card
 class GoalCard extends StatelessWidget {
   final Map<String, dynamic> goal;
   final VoidCallback onTap;
   final VoidCallback onDelete;
-  
- 
+
   const GoalCard({
     super.key,
     required this.goal,
     required this.onTap,
     required this.onDelete,
   });
- 
+
   static const Color _tealDark = Color(0xFF2D7D7B);
   static const Color _inkDark = Color(0xFF1A2D3D);
- 
+
   double get _pct {
     final target = parseAmount(goal['goalTargetAmt']);
     final current = parseAmount(goal['goalCurrentAmt']);
     if (target == 0) return 0;
     return (current / target).clamp(0.0, 1.0);
   }
- 
+
   String _month(int m) => const [
-        '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ][m];
- 
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ][m];
+
   String _formatDate(DateTime? dt) {
     if (dt == null) return '';
     return '${dt.day} ${_month(dt.month)} ${dt.year}';
   }
- 
+
   DateTime? _parseDate(dynamic value) {
     if (value == null) return null;
     try {
@@ -538,12 +595,12 @@ class GoalCard extends StatelessWidget {
       return null;
     }
   }
- 
+
   int? _daysLeft(DateTime? dt) {
     if (dt == null) return null;
     return dt.difference(DateTime.now()).inDays;
   }
- 
+
   @override
   Widget build(BuildContext context) {
     final title = goal['goalName']?.toString() ?? '';
@@ -551,10 +608,10 @@ class GoalCard extends StatelessWidget {
     final iconEmoji = goal['goalIcon']?.toString() ?? '🎯';
     final dueDate = _parseDate(goal['goalDueDate']);
     final days = _daysLeft(dueDate);
- 
+
     final current = parseAmount(goal['goalCurrentAmt']);
     final target = parseAmount(goal['goalTargetAmt']);
- 
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -583,7 +640,10 @@ class GoalCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
-                    child: Text(iconEmoji, style: const TextStyle(fontSize: 20)),
+                    child: Text(
+                      iconEmoji,
+                      style: const TextStyle(fontSize: 20),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -593,7 +653,11 @@ class GoalCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _inkDark),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: _inkDark,
+                        ),
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (dueDate != null) ...[
@@ -603,7 +667,9 @@ class GoalCard extends StatelessWidget {
                             Icon(
                               Icons.calendar_today_rounded,
                               size: 11,
-                              color: days != null && days < 0 ? Colors.red[400] : Colors.grey[400],
+                              color: days != null && days < 0
+                                  ? Colors.red[400]
+                                  : Colors.grey[400],
                             ),
                             const SizedBox(width: 4),
                             Expanded(
@@ -611,13 +677,15 @@ class GoalCard extends StatelessWidget {
                                 days == null
                                     ? _formatDate(dueDate)
                                     : days < 0
-                                        ? 'Overdue · ${_formatDate(dueDate)}'
-                                        : days == 0
-                                            ? 'Due today'
-                                            : '$days days left · ${_formatDate(dueDate)}',
+                                    ? 'Overdue · ${_formatDate(dueDate)}'
+                                    : days == 0
+                                    ? 'Due today'
+                                    : '$days days left · ${_formatDate(dueDate)}',
                                 style: TextStyle(
                                   fontSize: 11,
-                                  color: days != null && days < 0 ? Colors.red[400] : Colors.grey[500],
+                                  color: days != null && days < 0
+                                      ? Colors.red[400]
+                                      : Colors.grey[500],
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -640,7 +708,11 @@ class GoalCard extends StatelessWidget {
                       color: Colors.red.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(9),
                     ),
-                    child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 17),
+                    child: const Icon(
+                      Icons.delete_outline_rounded,
+                      color: Colors.red,
+                      size: 17,
+                    ),
                   ),
                 ),
               ],
@@ -652,29 +724,48 @@ class GoalCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Saved', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                    Text(
+                      'Saved',
+                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                    ),
                     const SizedBox(height: 2),
                     Text(
                       '\$${current.toStringAsFixed(2)}',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _tealDark),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: _tealDark,
+                      ),
                     ),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('Target', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
+                    Text(
+                      'Target',
+                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                    ),
                     const SizedBox(height: 2),
                     Text(
                       '\$${target.toStringAsFixed(2)}',
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _inkDark),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: _inkDark,
+                      ),
                     ),
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: _pct >= 1.0 ? const Color(0xFFD0F0EE) : const Color(0xFFE6F4F3),
+                    color: _pct >= 1.0
+                        ? const Color(0xFFD0F0EE)
+                        : const Color(0xFFE6F4F3),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -712,7 +803,11 @@ class GoalCard extends StatelessWidget {
                 child: const Center(
                   child: Text(
                     '🎉 Goal reached!',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF1A6B68)),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1A6B68),
+                    ),
                   ),
                 ),
               ),
@@ -723,12 +818,12 @@ class GoalCard extends StatelessWidget {
     );
   }
 }
- 
+
 // ── Status pill widget ─────────────────────────────────────────
 class _StatusPill extends StatelessWidget {
   final GoalStatus status;
   const _StatusPill({required this.status});
- 
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -744,14 +839,18 @@ class _StatusPill extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             status.label,
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: status.color),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: status.color,
+            ),
           ),
         ],
       ),
     );
   }
 }
- 
+
 // ── Bottom sheet form ────────────────────────────────────────────
 class _GoalFormSheet extends StatefulWidget {
   final bool isEdit;
@@ -803,8 +902,19 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
 
   String _formatDate(DateTime dt) {
     const months = [
-      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      '',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${dt.day} ${months[dt.month]} ${dt.year}';
   }
@@ -852,7 +962,8 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
     }
 
     Navigator.pop(context, {
-      if (widget.goalToEdit?['goalID'] != null) 'goalID': widget.goalToEdit!['goalID'],
+      if (widget.goalToEdit?['goalID'] != null)
+        'goalID': widget.goalToEdit!['goalID'],
       'goalName': title,
       'goalTargetAmt': target,
       'goalCurrentAmt': saved,
@@ -870,7 +981,10 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: EdgeInsets.fromLTRB(
-        24, 16, 24, MediaQuery.of(context).viewInsets.bottom + 32,
+        24,
+        16,
+        24,
+        MediaQuery.of(context).viewInsets.bottom + 32,
       ),
       child: SingleChildScrollView(
         child: Column(
@@ -897,12 +1011,20 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                     color: const Color(0xFFE6F4F3),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.flag_rounded, color: _tealDark, size: 20),
+                  child: const Icon(
+                    Icons.flag_rounded,
+                    color: _tealDark,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(
                   widget.isEdit ? 'Edit Goal' : 'New Goal',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: _inkDark),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: _inkDark,
+                  ),
                 ),
                 const Spacer(),
                 GestureDetector(
@@ -914,7 +1036,11 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                       color: const Color(0xFFEBF0F0),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.close_rounded, color: Color(0xFF1A2D3D), size: 18),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Color(0xFF1A2D3D),
+                      size: 18,
+                    ),
                   ),
                 ),
               ],
@@ -929,7 +1055,10 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                   color: const Color(0xFFEBF0F0),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 13,
+                ),
                 child: Row(
                   children: [
                     Container(
@@ -940,22 +1069,34 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
-                        child: Text(_selectedEmoji, style: const TextStyle(fontSize: 20)),
+                        child: Text(
+                          _selectedEmoji,
+                          style: const TextStyle(fontSize: 20),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Text(
                       kGoalIcons.firstWhere(
-                        (i) => i['emoji'] == _selectedEmoji,
-                        orElse: () => {'label': 'Custom'},
-                      )['label'] as String,
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: _inkDark),
+                            (i) => i['emoji'] == _selectedEmoji,
+                            orElse: () => {'label': 'Custom'},
+                          )['label']
+                          as String,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: _inkDark,
+                      ),
                     ),
                     const Spacer(),
                     AnimatedRotation(
                       turns: _showIconPicker ? 0.5 : 0,
                       duration: const Duration(milliseconds: 200),
-                      child: const Icon(Icons.keyboard_arrow_down_rounded, color: _tealDark, size: 22),
+                      child: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: _tealDark,
+                        size: 22,
+                      ),
                     ),
                   ],
                 ),
@@ -987,7 +1128,9 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 150),
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFE6F4F3) : Colors.white,
+                          color: isSelected
+                              ? const Color(0xFFE6F4F3)
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isSelected ? _tealDark : Colors.transparent,
@@ -1003,8 +1146,12 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                               item['label'] as String,
                               style: TextStyle(
                                 fontSize: 9,
-                                color: isSelected ? _tealDark : Colors.grey[500],
-                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                color: isSelected
+                                    ? _tealDark
+                                    : Colors.grey[500],
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -1015,7 +1162,9 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                   }).toList(),
                 ),
               ),
-              crossFadeState: _showIconPicker ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+              crossFadeState: _showIconPicker
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
               duration: const Duration(milliseconds: 200),
             ),
             const SizedBox(height: 14),
@@ -1031,7 +1180,9 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
               controller: widget.targetController,
               hint: '0.00',
               icon: Icons.flag_outlined,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
             const SizedBox(height: 14),
             _SheetField(
@@ -1039,7 +1190,9 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
               controller: widget.savedController,
               hint: '0.00',
               icon: Icons.savings_rounded,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
             const SizedBox(height: 14),
             const _SectionLabel(label: 'Due Date'),
@@ -1054,17 +1207,28 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                         color: const Color(0xFFEBF0F0),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                       child: Row(
                         children: [
-                          const Icon(Icons.calendar_today_rounded, color: _tealDark, size: 20),
+                          const Icon(
+                            Icons.calendar_today_rounded,
+                            color: _tealDark,
+                            size: 20,
+                          ),
                           const SizedBox(width: 12),
                           Text(
-                            _dueDate != null ? _formatDate(_dueDate!) : 'Set a due date',
+                            _dueDate != null
+                                ? _formatDate(_dueDate!)
+                                : 'Set a due date',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
-                              color: _dueDate != null ? _inkDark : Colors.grey[400],
+                              color: _dueDate != null
+                                  ? _inkDark
+                                  : Colors.grey[400],
                             ),
                           ),
                         ],
@@ -1083,7 +1247,11 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                         color: Colors.red.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(14),
                       ),
-                      child: const Icon(Icons.close_rounded, color: Colors.red, size: 18),
+                      child: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.red,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ],
@@ -1101,7 +1269,10 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                   onTap: () => setState(() => _status = s),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 9,
+                    ),
                     decoration: BoxDecoration(
                       color: isSelected ? s.bg : const Color(0xFFEBF0F0),
                       borderRadius: BorderRadius.circular(20),
@@ -1113,7 +1284,11 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(s.icon, size: 13, color: isSelected ? s.color : Colors.grey[500]),
+                        Icon(
+                          s.icon,
+                          size: 13,
+                          color: isSelected ? s.color : Colors.grey[500],
+                        ),
                         const SizedBox(width: 5),
                         Text(
                           s.label,
@@ -1133,19 +1308,30 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
               const SizedBox(height: 14),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.red.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline_rounded, color: Colors.red, size: 16),
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      color: Colors.red,
+                      size: 16,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _errorText!,
-                        style: const TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -1176,7 +1362,11 @@ class _GoalFormSheetState extends State<_GoalFormSheet> {
                 child: Center(
                   child: Text(
                     widget.isEdit ? 'Save Changes' : 'Add Goal',
-                    style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
@@ -1197,7 +1387,11 @@ class _SectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       label,
-      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+      style: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: Colors.grey[600],
+      ),
     );
   }
 }
@@ -1225,7 +1419,11 @@ class _SheetField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey[600]),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[600],
+          ),
         ),
         const SizedBox(height: 8),
         Container(
@@ -1236,7 +1434,11 @@ class _SheetField extends StatelessWidget {
           child: TextField(
             controller: controller,
             keyboardType: keyboardType,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF1A2D3D)),
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1A2D3D),
+            ),
             decoration: InputDecoration(
               prefixIcon: Icon(icon, color: const Color(0xFF2D7D7B), size: 20),
               hintText: hint,
@@ -1286,37 +1488,53 @@ String goalStatusToDbString(GoalStatus status) {
 extension GoalStatusExt on GoalStatus {
   String get label {
     switch (this) {
-      case GoalStatus.onTrack:   return 'On Track';
-      case GoalStatus.atRisk:    return 'At Risk';
-      case GoalStatus.paused:    return 'Paused';
-      case GoalStatus.completed: return 'Completed';
+      case GoalStatus.onTrack:
+        return 'On Track';
+      case GoalStatus.atRisk:
+        return 'At Risk';
+      case GoalStatus.paused:
+        return 'Paused';
+      case GoalStatus.completed:
+        return 'Completed';
     }
   }
 
   Color get color {
     switch (this) {
-      case GoalStatus.onTrack:   return const Color(0xFF2D7D7B);
-      case GoalStatus.atRisk:    return const Color(0xFFE07B39);
-      case GoalStatus.paused:    return const Color(0xFF8A94A6);
-      case GoalStatus.completed: return const Color(0xFF1A6B68);
+      case GoalStatus.onTrack:
+        return const Color(0xFF2D7D7B);
+      case GoalStatus.atRisk:
+        return const Color(0xFFE07B39);
+      case GoalStatus.paused:
+        return const Color(0xFF8A94A6);
+      case GoalStatus.completed:
+        return const Color(0xFF1A6B68);
     }
   }
 
   Color get bg {
     switch (this) {
-      case GoalStatus.onTrack:   return const Color(0xFFE6F4F3);
-      case GoalStatus.atRisk:    return const Color(0xFFFFF0E8);
-      case GoalStatus.paused:    return const Color(0xFFF0F1F4);
-      case GoalStatus.completed: return const Color(0xFFD0F0EE);
+      case GoalStatus.onTrack:
+        return const Color(0xFFE6F4F3);
+      case GoalStatus.atRisk:
+        return const Color(0xFFFFF0E8);
+      case GoalStatus.paused:
+        return const Color(0xFFF0F1F4);
+      case GoalStatus.completed:
+        return const Color(0xFFD0F0EE);
     }
   }
 
   IconData get icon {
     switch (this) {
-      case GoalStatus.onTrack:   return Icons.trending_up_rounded;
-      case GoalStatus.atRisk:    return Icons.warning_amber_rounded;
-      case GoalStatus.paused:    return Icons.pause_circle_outline_rounded;
-      case GoalStatus.completed: return Icons.check_circle_outline_rounded;
+      case GoalStatus.onTrack:
+        return Icons.trending_up_rounded;
+      case GoalStatus.atRisk:
+        return Icons.warning_amber_rounded;
+      case GoalStatus.paused:
+        return Icons.pause_circle_outline_rounded;
+      case GoalStatus.completed:
+        return Icons.check_circle_outline_rounded;
     }
   }
 }

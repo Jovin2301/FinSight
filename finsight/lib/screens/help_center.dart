@@ -111,10 +111,14 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
     final filtered = _searchQuery.isEmpty
         ? _faqs
         : _faqs
-            .where((f) =>
-                f.question.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                f.answer.toLowerCase().contains(_searchQuery.toLowerCase()))
-            .toList();
+              .where(
+                (f) =>
+                    f.question.toLowerCase().contains(
+                      _searchQuery.toLowerCase(),
+                    ) ||
+                    f.answer.toLowerCase().contains(_searchQuery.toLowerCase()),
+              )
+              .toList();
 
     return Scaffold(
       backgroundColor: _bgColor,
@@ -129,8 +133,11 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
               color: _cardColor,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: _tealDark, size: 18),
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: _tealDark,
+              size: 18,
+            ),
           ),
         ),
         title: const Text(
@@ -174,8 +181,10 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                           _searchController.clear();
                           setState(() => _searchQuery = '');
                         },
-                        child:
-                            Icon(Icons.close_rounded, color: Colors.grey[400]),
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: Colors.grey[400],
+                        ),
                       )
                     : null,
                 border: InputBorder.none,
@@ -204,9 +213,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
               childAspectRatio: 1.05,
-              children: _topics
-                  .map((t) => _TopicCard(topic: t))
-                  .toList(),
+              children: _topics.map((t) => _TopicCard(topic: t)).toList(),
             ),
             const SizedBox(height: 28),
           ],
@@ -238,11 +245,16 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 32),
                 child: Column(
                   children: [
-                    Icon(Icons.search_off_rounded,
-                        size: 48, color: Colors.grey[300]),
+                    Icon(
+                      Icons.search_off_rounded,
+                      size: 48,
+                      color: Colors.grey[300],
+                    ),
                     const SizedBox(height: 12),
-                    Text('No results for "$_searchQuery"',
-                        style: TextStyle(color: Colors.grey[500])),
+                    Text(
+                      'No results for "$_searchQuery"',
+                      style: TextStyle(color: Colors.grey[500]),
+                    ),
                   ],
                 ),
               ),
@@ -276,19 +288,22 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                 const SizedBox(height: 6),
                 Text(
                   'Our team is happy to assist you.',
-                  style:
-                      TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 13,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 GestureDetector(
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (_) => const ContactUsScreen()),
+                    MaterialPageRoute(builder: (_) => const ContactUsScreen()),
                   ),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
@@ -314,7 +329,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
   }
 }
 
-// ── Topic card 
+// ── Topic card
 class _TopicCard extends StatelessWidget {
   final _TopicItem topic;
   const _TopicCard({required this.topic});
@@ -369,7 +384,7 @@ class _TopicCard extends StatelessWidget {
   }
 }
 
-// ── FAQ tile 
+// ── FAQ tile
 class _FAQTile extends StatefulWidget {
   final _FAQItem item;
   const _FAQTile({required this.item});
@@ -388,9 +403,13 @@ class _FAQTileState extends State<_FAQTile>
   void initState() {
     super.initState();
     _ctrl = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 200));
-    _rotate = Tween<double>(begin: 0, end: 0.5).animate(
-        CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+    _rotate = Tween<double>(
+      begin: 0,
+      end: 0.5,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -424,8 +443,7 @@ class _FAQTileState extends State<_FAQTile>
         child: Column(
           children: [
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Row(
                 children: [
                   Expanded(
@@ -441,8 +459,11 @@ class _FAQTileState extends State<_FAQTile>
                   const SizedBox(width: 8),
                   RotationTransition(
                     turns: _rotate,
-                    child: const Icon(Icons.keyboard_arrow_down_rounded,
-                        color: Color(0xFF2D7D7B), size: 22),
+                    child: const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: Color(0xFF2D7D7B),
+                      size: 22,
+                    ),
                   ),
                 ],
               ),
@@ -453,7 +474,8 @@ class _FAQTileState extends State<_FAQTile>
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
                 decoration: const BoxDecoration(
                   border: Border(
-                      top: BorderSide(color: Color(0xFFF0F4F4), width: 1)),
+                    top: BorderSide(color: Color(0xFFF0F4F4), width: 1),
+                  ),
                 ),
                 child: Text(
                   widget.item.answer,

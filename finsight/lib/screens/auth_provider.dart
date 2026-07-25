@@ -4,10 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider extends ChangeNotifier {
   final _storage = const FlutterSecureStorage(
-  iOptions: IOSOptions(
-    accessibility: KeychainAccessibility.first_unlock,
-  ),
-);
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
 
   String? _token;
   Map<String, dynamic>? _user;
@@ -17,11 +15,10 @@ class AuthProvider extends ChangeNotifier {
   Map<String, dynamic>? get user => _user;
   bool get isLoggedIn => _token != null;
 
-  
   Future<void> setSession(String token, Map<String, dynamic> user) async {
     _token = token;
     _user = user;
-    
+
     try {
       await _storage.write(key: 'token', value: token);
     } catch (e) {
@@ -38,11 +35,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void updateUser(Map<String, dynamic> updatedUser) {
-
-    _user = {
-      ..._user ?? {},
-      ...updatedUser,
-    };
+    _user = {..._user ?? {}, ...updatedUser};
     notifyListeners();
   }
 
@@ -87,4 +80,3 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-

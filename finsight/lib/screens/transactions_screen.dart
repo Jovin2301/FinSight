@@ -21,7 +21,7 @@ class TransactionsScreen extends StatefulWidget {
   final ValueChanged<Expense> onAddExpense;
   final ValueChanged<RecurringPayment> onAddRecurringPayment;
   final void Function(int index, RecurringPayment payment)
-      onUpdateRecurringPayment;
+  onUpdateRecurringPayment;
   final ValueChanged<int> onDeleteRecurringPayment;
   final void Function(int index, Expense expense) onUpdateExpense;
   final ValueChanged<int> onDeleteExpense;
@@ -547,12 +547,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           return;
         }
       }
-
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export failed: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
       }
     } finally {
       if (mounted) setState(() => _isExporting = false);
@@ -1002,7 +1001,8 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   Widget _recurringPaymentCard(int index, RecurringPayment payment) {
-    final percentText = payment.frequency[0].toUpperCase() +
+    final percentText =
+        payment.frequency[0].toUpperCase() +
         payment.frequency.substring(1).toLowerCase();
 
     return Card(

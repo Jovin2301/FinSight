@@ -25,8 +25,11 @@ class TopicAppBar extends StatelessWidget implements PreferredSizeWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: tealDark, size: 18),
+          child: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: tealDark,
+            size: 18,
+          ),
         ),
       ),
       title: Text(
@@ -75,7 +78,12 @@ class HelpCard extends StatelessWidget {
   final EdgeInsets? padding;
   final Color? borderColor;
 
-  const HelpCard({super.key, required this.child, this.padding, this.borderColor});
+  const HelpCard({
+    super.key,
+    required this.child,
+    this.padding,
+    this.borderColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -134,13 +142,20 @@ class _FaqItemState extends State<FaqItem> {
           trailing: AnimatedRotation(
             turns: _open ? 0.5 : 0,
             duration: const Duration(milliseconds: 200),
-            child: const Icon(Icons.keyboard_arrow_down_rounded, color: tealDark),
+            child: const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              color: tealDark,
+            ),
           ),
           onExpansionChanged: (v) => setState(() => _open = v),
           children: [
             Text(
               widget.answer,
-              style: TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.6),
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[600],
+                height: 1.6,
+              ),
             ),
           ],
         ),
@@ -191,15 +206,23 @@ class StepTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title,
-                    style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1A1A1A))),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1A1A1A),
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(body,
-                    style: TextStyle(
-                        fontSize: 13, color: Colors.grey[600], height: 1.5)),
+                Text(
+                  body,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                    height: 1.5,
+                  ),
+                ),
               ],
             ),
           ),
@@ -223,13 +246,21 @@ class BulletTile extends StatelessWidget {
           margin: const EdgeInsets.only(top: 7),
           width: 5,
           height: 5,
-          decoration: const BoxDecoration(color: tealDark, shape: BoxShape.circle),
+          decoration: const BoxDecoration(
+            color: tealDark,
+            shape: BoxShape.circle,
+          ),
         ),
         const SizedBox(width: 10),
         Expanded(
-          child: Text(text,
-              style:
-                  TextStyle(fontSize: 13, color: Colors.grey[600], height: 1.5)),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[600],
+              height: 1.5,
+            ),
+          ),
         ),
       ],
     );
@@ -252,13 +283,21 @@ class WarningBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_rounded,
-              color: Color(0xFFE05C2A), size: 20),
+          const Icon(
+            Icons.warning_amber_rounded,
+            color: Color(0xFFE05C2A),
+            size: 20,
+          ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text,
-                style: const TextStyle(
-                    fontSize: 12, color: Color(0xFF7A3010), height: 1.4)),
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Color(0xFF7A3010),
+                height: 1.4,
+              ),
+            ),
           ),
         ],
       ),
@@ -284,9 +323,14 @@ class InfoBanner extends StatelessWidget {
           const Icon(Icons.info_outline_rounded, color: tealDark, size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text,
-                style: const TextStyle(
-                    fontSize: 12, color: tealDark, height: 1.4)),
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 12,
+                color: tealDark,
+                height: 1.4,
+              ),
+            ),
           ),
         ],
       ),

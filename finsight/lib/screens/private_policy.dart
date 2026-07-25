@@ -26,8 +26,11 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white, size: 18),
+                child: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
@@ -41,15 +44,16 @@ class PrivacyPolicyScreen extends StatelessWidget {
                 ),
                 child: SafeArea(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.fromLTRB(20, 53, 20, 20),
+                    padding: const EdgeInsets.fromLTRB(20, 53, 20, 20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 4),
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
@@ -57,10 +61,11 @@ class PrivacyPolicyScreen extends StatelessWidget {
                           child: const Text(
                             'Legal',
                             style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                letterSpacing: 0.8),
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.8,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -76,8 +81,9 @@ class PrivacyPolicyScreen extends StatelessWidget {
                         Text(
                           'Last updated June 2026 · FinSight Orbital 2026',
                           style: TextStyle(
-                              color: Colors.white.withOpacity(0.7),
-                              fontSize: 12),
+                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -247,8 +253,10 @@ class _PolicySection extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: tagBg,
                   borderRadius: BorderRadius.circular(8),
@@ -275,8 +283,7 @@ class _PolicySection extends StatelessWidget {
                   color: const Color(0xFFE6F4F3),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icon,
-                    color: const Color(0xFF2D7D7B), size: 18),
+                child: Icon(icon, color: const Color(0xFF2D7D7B), size: 18),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -296,7 +303,10 @@ class _PolicySection extends StatelessWidget {
             Text(
               body!,
               style: TextStyle(
-                  fontSize: 13, color: Colors.grey[600], height: 1.6),
+                fontSize: 13,
+                color: Colors.grey[600],
+                height: 1.6,
+              ),
             ),
           if (bullets != null)
             ...bullets!.map(
@@ -319,19 +329,17 @@ class _PolicySection extends StatelessWidget {
                       child: Text(
                         b,
                         style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[600],
-                            height: 1.5),
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                          height: 1.5,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          if (extra != null) ...[
-            const SizedBox(height: 12),
-            extra!,
-          ],
+          if (extra != null) ...[const SizedBox(height: 12), extra!],
         ],
       ),
     );
@@ -367,8 +375,7 @@ class _InfoCallout extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                  fontSize: 13, color: color, height: 1.5),
+              style: TextStyle(fontSize: 13, color: color, height: 1.5),
             ),
           ),
         ],
@@ -404,22 +411,28 @@ class _ContactBand extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
-          Text(title,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700)),
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(height: 6),
-          Text(subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: Colors.white.withOpacity(0.8), fontSize: 13)),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 13,
+            ),
+          ),
           const SizedBox(height: 16),
           GestureDetector(
             onTap: onTap,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -427,9 +440,10 @@ class _ContactBand extends StatelessWidget {
               child: Text(
                 buttonLabel,
                 style: const TextStyle(
-                    color: Color(0xFF2D7D7B),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14),
+                  color: Color(0xFF2D7D7B),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),

@@ -21,17 +21,23 @@ class PrivacySecurityScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Privacy & Security',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1A1A1A))),
+                      const Text(
+                        'Privacy & Security',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text('How we protect your data and what you control.',
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                              height: 1.4)),
+                      Text(
+                        'How we protect your data and what you control.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                          height: 1.4,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -45,19 +51,22 @@ class PrivacySecurityScreen extends StatelessWidget {
             child: Column(
               children: [
                 _securityRow(
-                    Icons.enhanced_encryption_rounded,
-                    'End-to-end encryption',
-                    'All data is encrypted and secured.'),
+                  Icons.enhanced_encryption_rounded,
+                  'End-to-end encryption',
+                  'All data is encrypted and secured.',
+                ),
                 const Divider(height: 20),
                 _securityRow(
-                    Icons.visibility_off_rounded,
-                    'No data selling',
-                    'FinSight never sells or shares your financial data with third parties.'),
+                  Icons.visibility_off_rounded,
+                  'No data selling',
+                  'FinSight never sells or shares your financial data with third parties.',
+                ),
                 const Divider(height: 20),
                 _securityRow(
-                    Icons.cloud_done_rounded,
-                    'Secure cloud backup',
-                    'Your data is backed up to a secure server — only you can access it.'),
+                  Icons.cloud_done_rounded,
+                  'Secure cloud backup',
+                  'Your data is backed up to a secure server — only you can access it.',
+                ),
               ],
             ),
           ),
@@ -67,14 +76,20 @@ class PrivacySecurityScreen extends StatelessWidget {
           HelpCard(
             child: Column(
               children: [
-                _controlRow('Export my data',
-                    'Settings → Privacy → Export Data (CSV or JSON)'),
+                _controlRow(
+                  'Export my data',
+                  'Settings → Privacy → Export Data (CSV or JSON)',
+                ),
                 const Divider(height: 16),
-                _controlRow('Delete my account',
-                    'Settings → Privacy → Delete Account — permanently removes all data'),
+                _controlRow(
+                  'Delete my account',
+                  'Settings → Privacy → Delete Account — permanently removes all data',
+                ),
                 const Divider(height: 16),
-                _controlRow('Revoke permissions',
-                    'Settings → Permissions — manage camera, notifications, and more'),
+                _controlRow(
+                  'Revoke permissions',
+                  'Settings → Permissions — manage camera, notifications, and more',
+                ),
               ],
             ),
           ),
@@ -96,8 +111,9 @@ class PrivacySecurityScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           const InfoBanner(
-              text:
-                  'FinSight is compliant with Singapore\'s Personal Data Protection Act (PDPA).'),
+            text:
+                'FinSight is compliant with Singapore\'s Personal Data Protection Act (PDPA).',
+          ),
         ],
       ),
     );
@@ -111,7 +127,9 @@ class PrivacySecurityScreen extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-              color: tealLight, borderRadius: BorderRadius.circular(10)),
+            color: tealLight,
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Icon(icon, color: tealDark, size: 18),
         ),
         const SizedBox(width: 12),
@@ -119,15 +137,23 @@ class PrivacySecurityScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A1A1A))),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
               const SizedBox(height: 3),
-              Text(subtitle,
-                  style: TextStyle(
-                      fontSize: 12, color: Colors.grey[500], height: 1.4)),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[500],
+                  height: 1.4,
+                ),
+              ),
             ],
           ),
         ),
@@ -142,19 +168,27 @@ class PrivacySecurityScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(action,
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A1A1A))),
+              Text(
+                action,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
               const SizedBox(height: 2),
-              Text(location,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+              Text(
+                location,
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              ),
             ],
           ),
         ),
-        const Icon(Icons.chevron_right_rounded,
-            color: Color(0xFFCCCCCC), size: 20),
+        const Icon(
+          Icons.chevron_right_rounded,
+          color: Color(0xFFCCCCCC),
+          size: 20,
+        ),
       ],
     );
   }

@@ -55,14 +55,14 @@ class Goal {
   }
 
   Map<String, dynamic> toJson() => {
-        'goalID': id,
-        'goalName': title,
-        'goalTargetAmt': targetAmount,
-        'goalCurrentAmt': savedAmount,
-        'goalDueDate': dueDate?.toIso8601String(),
-        'goalStatus': status?.name,
-        'goalIconEmoji': iconEmoji,
-      };
+    'goalID': id,
+    'goalName': title,
+    'goalTargetAmt': targetAmount,
+    'goalCurrentAmt': savedAmount,
+    'goalDueDate': dueDate?.toIso8601String(),
+    'goalStatus': status?.name,
+    'goalIconEmoji': iconEmoji,
+  };
 
   /// Postgres NUMERIC/DECIMAL columns come back through node-postgres as
   /// Strings (to avoid floating point precision loss), not as num — so this

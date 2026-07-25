@@ -14,7 +14,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
@@ -33,9 +32,7 @@ class _SplashScreenState extends State<SplashScreen>
       context,
       MaterialPageRoute(
         builder: (_) =>
-            auth.isLoggedIn
-                ? const MainScreen()
-                : const LoginScreen(),
+            auth.isLoggedIn ? const MainScreen() : const LoginScreen(),
       ),
     );
   }
@@ -52,17 +49,9 @@ class _SplashScreenState extends State<SplashScreen>
     _scaleAnimation = Tween<double>(
       begin: 0.6,
       end: 1,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOutBack,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
-    _opacityAnimation = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(_controller);
+    _opacityAnimation = Tween<double>(begin: 0, end: 1).animate(_controller);
 
     _controller.forward();
 
@@ -75,16 +64,13 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: const Color(0xff00897B),
 
       body: Stack(
         children: [
-
           /// Decorative circles
           Positioned(
             top: -120,
@@ -120,7 +106,6 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-
                     Container(
                       height: 120,
                       width: 120,
@@ -132,15 +117,13 @@ class _SplashScreenState extends State<SplashScreen>
                             blurRadius: 25,
                             color: Colors.black.withOpacity(.15),
                             offset: const Offset(0, 10),
-                          )
+                          ),
                         ],
                       ),
 
                       child: Padding(
                         padding: const EdgeInsets.all(22),
-                        child: Image.asset(
-                          'assets/images/finsight_logo.png',
-                        ),
+                        child: Image.asset('assets/images/finsight_logo.png'),
                       ),
                     ),
 
@@ -175,7 +158,7 @@ class _SplashScreenState extends State<SplashScreen>
                         color: Colors.white,
                         strokeWidth: 3,
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -200,4 +183,3 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
-

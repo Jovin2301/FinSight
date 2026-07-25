@@ -7,7 +7,7 @@ class ContactUsScreen extends StatelessWidget {
 
   Future<void> _launchWebsite() async {
     final Uri url = Uri.parse('https://github.com/Jovin2301/FinSight.git');
-    
+
     if (!await launchUrl(url)) {
       throw Exception('Could not launch $url');
     }
@@ -36,7 +36,10 @@ class ContactUsScreen extends StatelessWidget {
                   child: Text(
                     'FinSight is a student project. We appreciate your patience and feedback — it genuinely helps us grow.',
                     style: TextStyle(
-                        fontSize: 12, color: Colors.brown[700], height: 1.4),
+                      fontSize: 12,
+                      color: Colors.brown[700],
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ],
@@ -53,18 +56,23 @@ class ContactUsScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Contact Us',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1A1A1A))),
+                      const Text(
+                        'Contact Us',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text(
-                          'We\'re a small student team — we\'ll get back to you as soon as we can.',
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                              height: 1.4)),
+                        'We\'re a small student team — we\'ll get back to you as soon as we can.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                          height: 1.4,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -77,8 +85,9 @@ class ContactUsScreen extends StatelessWidget {
           _contactCard(
             icon: Icons.email_rounded,
             title: 'Email Support',
-            subtitle: 'Jovin: e1527037@u.nus.edu \n'
-            'Zhi Hui: e1526364@u.nus.edu',
+            subtitle:
+                'Jovin: e1527037@u.nus.edu \n'
+                'Zhi Hui: e1526364@u.nus.edu',
             tag: 'Replies within 1–2 working days',
             tagColor: tealDark,
             tagBg: tealLight,
@@ -114,18 +123,25 @@ class ContactUsScreen extends StatelessWidget {
                 Text(
                   'Checking these first saves time for both of us:',
                   style: TextStyle(
-                      fontSize: 13, color: Colors.grey[600], height: 1.5),
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                    height: 1.5,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 const BulletTile(
-                    text: 'Read through the relevant Help Centre topic above.'),
+                  text: 'Read through the relevant Help Centre topic above.',
+                ),
                 const BulletTile(
-                    text: 'Make sure your app is updated to the latest version.'),
+                  text: 'Make sure your app is updated to the latest version.',
+                ),
                 const BulletTile(
-                    text: 'Try signing out and back in if it\'s a sync issue.'),
+                  text: 'Try signing out and back in if it\'s a sync issue.',
+                ),
                 const BulletTile(
-                    text:
-                        'Include your device model and OS version when emailing.'),
+                  text:
+                      'Include your device model and OS version when emailing.',
+                ),
               ],
             ),
           ),
@@ -144,7 +160,6 @@ class ContactUsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-
         ],
       ),
     );
@@ -168,7 +183,9 @@ class ContactUsScreen extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                  color: tealLight, borderRadius: BorderRadius.circular(12)),
+                color: tealLight,
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Icon(icon, color: tealDark, size: 20),
             ),
             const SizedBox(width: 12),
@@ -176,31 +193,46 @@ class ContactUsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1A1A1A))),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1A1A1A),
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(subtitle,
-                      style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  ),
                   const SizedBox(height: 6),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
-                        color: tagBg, borderRadius: BorderRadius.circular(6)),
-                    child: Text(tag,
-                        style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: tagColor)),
+                      color: tagBg,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      tag,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: tagColor,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded,
-                color: Color(0xFFCCCCCC), size: 20),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: Color(0xFFCCCCCC),
+              size: 20,
+            ),
           ],
         ),
       ),
@@ -211,19 +243,29 @@ class ContactUsScreen extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Text(type,
-              style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF1A1A1A))),
+          child: Text(
+            type,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF1A1A1A),
+            ),
+          ),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-              color: tealLight, borderRadius: BorderRadius.circular(8)),
-          child: Text(time,
-              style: const TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: tealDark)),
+            color: tealLight,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            time,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: tealDark,
+            ),
+          ),
         ),
       ],
     );

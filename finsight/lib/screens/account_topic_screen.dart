@@ -22,18 +22,23 @@ class AccountLoginScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Account & Login',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1A1A1A))),
+                      const Text(
+                        'Account & Login',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text(
-                          'Manage your profile, password, and login methods.',
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                              height: 1.4)),
+                        'Manage your profile, password, and login methods.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                          height: 1.4,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -44,24 +49,29 @@ class AccountLoginScreen extends StatelessWidget {
 
           const SectionLabel(text: 'Reset Your Password'),
           const StepTile(
-              step: 1,
-              title: 'Go to Login screen',
-              body: 'Tap "Forgot Password?" below the sign-in button.'),
+            step: 1,
+            title: 'Go to Login screen',
+            body: 'Tap "Forgot Password?" below the sign-in button.',
+          ),
           const SizedBox(height: 10),
           const StepTile(
-              step: 2,
-              title: 'Enter your email',
-              body: 'We\'ll send a 6-digit OTP to your registered email address.'),
+            step: 2,
+            title: 'Enter your email',
+            body: 'We\'ll send a 6-digit OTP to your registered email address.',
+          ),
           const SizedBox(height: 10),
           const StepTile(
-              step: 3,
-              title: 'Verify OTP',
-              body: 'Enter the code within 10 minutes — it expires after that.'),
+            step: 3,
+            title: 'Verify OTP',
+            body: 'Enter the code within 10 minutes — it expires after that.',
+          ),
           const SizedBox(height: 10),
           const StepTile(
-              step: 4,
-              title: 'Set new password',
-              body: 'Choose a password with at least 8 characters, mixing letters and numbers.'),
+            step: 4,
+            title: 'Set new password',
+            body:
+                'Choose a password with at least 8 characters, mixing letters and numbers.',
+          ),
           const SizedBox(height: 20),
 
           const SectionLabel(text: 'Common Questions'),
@@ -91,8 +101,9 @@ class AccountLoginScreen extends StatelessWidget {
           const SizedBox(height: 20),
 
           const WarningBanner(
-              text:
-                  'Never share your password or OTP with anyone, including FinSight support.'),
+            text:
+                'Never share your password or OTP with anyone, including FinSight support.',
+          ),
         ],
       ),
     );

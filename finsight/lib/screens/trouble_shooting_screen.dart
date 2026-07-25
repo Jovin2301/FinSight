@@ -59,17 +59,23 @@ class TroubleshootingScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Troubleshooting',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1A1A1A))),
+                      const Text(
+                        'Troubleshooting',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text('Fix common issues quickly with these solutions.',
-                          style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                              height: 1.4)),
+                      Text(
+                        'Fix common issues quickly with these solutions.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                          height: 1.4,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -82,17 +88,29 @@ class TroubleshootingScreen extends StatelessWidget {
           HelpCard(
             child: Column(
               children: [
-                _quickFix(Icons.refresh_rounded, 'Force refresh',
-                    'Pull down on any screen to sync the latest data.'),
+                _quickFix(
+                  Icons.refresh_rounded,
+                  'Force refresh',
+                  'Pull down on any screen to sync the latest data.',
+                ),
                 const Divider(height: 20),
-                _quickFix(Icons.system_update_rounded, 'Update the app',
-                    'Most bugs are fixed in the latest version.'),
+                _quickFix(
+                  Icons.system_update_rounded,
+                  'Update the app',
+                  'Most bugs are fixed in the latest version.',
+                ),
                 const Divider(height: 20),
-                _quickFix(Icons.logout_rounded, 'Sign out & back in',
-                    'Resolves most account and sync-related issues.'),
+                _quickFix(
+                  Icons.logout_rounded,
+                  'Sign out & back in',
+                  'Resolves most account and sync-related issues.',
+                ),
                 const Divider(height: 20),
-                _quickFix(Icons.delete_sweep_rounded, 'Clear app cache',
-                    'Fixes display glitches and slow performance.'),
+                _quickFix(
+                  Icons.delete_sweep_rounded,
+                  'Clear app cache',
+                  'Fixes display glitches and slow performance.',
+                ),
               ],
             ),
           ),
@@ -102,17 +120,19 @@ class TroubleshootingScreen extends StatelessWidget {
           ...List.generate(
             _issues.length,
             (i) => Padding(
-              padding:
-                  EdgeInsets.only(bottom: i < _issues.length - 1 ? 10 : 0),
+              padding: EdgeInsets.only(bottom: i < _issues.length - 1 ? 10 : 0),
               child: FaqItem(
-                  question: _issues[i]['q']!, answer: _issues[i]['a']!),
+                question: _issues[i]['q']!,
+                answer: _issues[i]['a']!,
+              ),
             ),
           ),
           const SizedBox(height: 20),
 
           const WarningBanner(
-              text:
-                  'Still stuck? Tap "Contact Us" from the Help Centre to reach our support team.'),
+            text:
+                'Still stuck? Tap "Contact Us" from the Help Centre to reach our support team.',
+          ),
         ],
       ),
     );
@@ -125,7 +145,9 @@ class TroubleshootingScreen extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-              color: tealLight, borderRadius: BorderRadius.circular(10)),
+            color: tealLight,
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Icon(icon, color: tealDark, size: 18),
         ),
         const SizedBox(width: 12),
@@ -133,14 +155,19 @@ class TroubleshootingScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A1A1A))),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1A1A1A),
+                ),
+              ),
               const SizedBox(height: 2),
-              Text(subtitle,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+              Text(
+                subtitle,
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+              ),
             ],
           ),
         ),

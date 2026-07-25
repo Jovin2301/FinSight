@@ -11,8 +11,7 @@ class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
 
   @override
-  State<ChangePasswordScreen> createState() =>
-      _ChangePasswordScreenState();
+  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
 // ── Live requirement checklist row ─────────────────────────────
@@ -45,9 +44,7 @@ class _RequirementRow extends StatelessWidget {
   }
 }
 
-class _ChangePasswordScreenState
-    extends State<ChangePasswordScreen> {
-
+class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final currentController = TextEditingController();
@@ -80,7 +77,9 @@ class _ChangePasswordScreenState
       _hasMinLength = value.length >= 8;
       _hasUppercase = value.contains(RegExp(r'[A-Z]'));
       _hasNumber = value.contains(RegExp(r'[0-9]'));
-      _hasSpecialChar = value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>_\-\[\]\\/;+=~`]'));
+      _hasSpecialChar = value.contains(
+        RegExp(r'[!@#$%^&*(),.?":{}|<>_\-\[\]\\/;+=~`]'),
+      );
     });
   }
 
@@ -130,9 +129,7 @@ class _ChangePasswordScreenState
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Password changed successfully!'),
-          ),
+          const SnackBar(content: Text('Password changed successfully!')),
         );
         Navigator.pop(context);
       } else {
@@ -145,9 +142,9 @@ class _ChangePasswordScreenState
         } catch (_) {
           // response body wasn't JSON; fall back to the default message
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
       }
     } catch (e) {
       if (!mounted) return;
@@ -161,32 +158,23 @@ class _ChangePasswordScreenState
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
-      appBar: AppBar(
-        title: const Text("Change Password"),
-      ),
+      appBar: AppBar(title: const Text("Change Password")),
 
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
 
           child: Form(
-
             key: _formKey,
 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
 
               children: [
-
                 const Text(
                   "Keep your account secure by creating a strong password.",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 15, color: Colors.grey),
                 ),
 
                 const SizedBox(height: 35),
@@ -199,9 +187,7 @@ class _ChangePasswordScreenState
                     prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        hideCurrent
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                        hideCurrent ? Icons.visibility_off : Icons.visibility,
                       ),
                       onPressed: () {
                         setState(() {
@@ -211,9 +197,7 @@ class _ChangePasswordScreenState
                     ),
                   ),
                   validator: (value) =>
-                      value!.isEmpty
-                          ? "Enter current password"
-                          : null,
+                      value!.isEmpty ? "Enter current password" : null,
                 ),
 
                 const SizedBox(height: 20),
@@ -226,9 +210,7 @@ class _ChangePasswordScreenState
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        hideNew
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                        hideNew ? Icons.visibility_off : Icons.visibility,
                       ),
                       onPressed: () {
                         setState(() {
@@ -238,7 +220,6 @@ class _ChangePasswordScreenState
                     ),
                   ),
                   validator: (value) {
-
                     if (value == null || value.isEmpty) {
                       return "Enter a new password";
                     }
@@ -260,9 +241,7 @@ class _ChangePasswordScreenState
                     prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        hideConfirm
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                        hideConfirm ? Icons.visibility_off : Icons.visibility,
                       ),
                       onPressed: () {
                         setState(() {
@@ -272,7 +251,6 @@ class _ChangePasswordScreenState
                     ),
                   ),
                   validator: (value) {
-
                     if (value != newController.text) {
                       return "Passwords do not match";
                     }
@@ -293,12 +271,9 @@ class _ChangePasswordScreenState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       const Text(
                         "Password must contain:",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
 
                       const SizedBox(height: 16),
@@ -313,16 +288,12 @@ class _ChangePasswordScreenState
                         met: _hasUppercase,
                       ),
                       const SizedBox(height: 8),
-                      _RequirementRow(
-                        label: "One number",
-                        met: _hasNumber,
-                      ),
+                      _RequirementRow(label: "One number", met: _hasNumber),
                       const SizedBox(height: 8),
                       _RequirementRow(
                         label: "One special character",
                         met: _hasSpecialChar,
                       ),
-
                     ],
                   ),
                 ),
@@ -337,9 +308,7 @@ class _ChangePasswordScreenState
                           height: 20,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text(
-                          "Change Password",
-                        ),
+                      : const Text("Change Password"),
                 ),
               ],
             ),

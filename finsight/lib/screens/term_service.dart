@@ -75,8 +75,11 @@ class TermsOfServiceScreen extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: _tealDark, size: 18),
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: _tealDark,
+              size: 18,
+            ),
           ),
         ),
         title: const Text(
@@ -96,8 +99,11 @@ class TermsOfServiceScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: IconButton(
-              icon: const Icon(Icons.share_outlined,
-                  color: _tealDark, size: 18),
+              icon: const Icon(
+                Icons.share_outlined,
+                color: _tealDark,
+                size: 18,
+              ),
               onPressed: () {},
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
@@ -139,16 +145,18 @@ class TermsOfServiceScreen extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
             child: Row(
               children: [
-                Icon(Icons.calendar_today_rounded,
-                    size: 13, color: Colors.grey[400]),
+                Icon(
+                  Icons.calendar_today_rounded,
+                  size: 13,
+                  color: Colors.grey[400],
+                ),
                 const SizedBox(width: 5),
                 Text(
                   'Last updated June 2026',
                   style: TextStyle(fontSize: 12, color: Colors.grey[500]),
                 ),
                 const SizedBox(width: 12),
-                Icon(Icons.school_rounded,
-                    size: 13, color: Colors.grey[400]),
+                Icon(Icons.school_rounded, size: 13, color: Colors.grey[400]),
                 const SizedBox(width: 5),
                 Text(
                   'NUS Orbital 2026',
@@ -164,8 +172,7 @@ class TermsOfServiceScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
               itemCount: _sections.length,
               separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, i) =>
-                  _TermsTile(section: _sections[i]),
+              itemBuilder: (context, i) => _TermsTile(section: _sections[i]),
             ),
           ),
 
@@ -174,18 +181,26 @@ class TermsOfServiceScreen extends StatelessWidget {
             decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(
-                  top: BorderSide(color: Color(0xFFEBF0F0), width: 1)),
+                top: BorderSide(color: Color(0xFFEBF0F0), width: 1),
+              ),
             ),
             padding: EdgeInsets.fromLTRB(
-                20, 14, 20, MediaQuery.of(context).padding.bottom + 14),
+              20,
+              14,
+              20,
+              MediaQuery.of(context).padding.bottom + 14,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   'By tapping "I Understand", you confirm you have read and agreed to these Terms.',
                   textAlign: TextAlign.center,
-                  style:
-                      TextStyle(fontSize: 11, color: Colors.grey[500], height: 1.4),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[500],
+                    height: 1.4,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
@@ -204,7 +219,9 @@ class TermsOfServiceScreen extends StatelessWidget {
                     child: const Text(
                       'I Understand',
                       style: TextStyle(
-                          fontSize: 15, fontWeight: FontWeight.w700),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ),
@@ -280,8 +297,11 @@ class _TermsTile extends StatelessWidget {
                 ),
               ),
               if (section.isWarning)
-                const Icon(Icons.warning_amber_rounded,
-                    color: Color(0xFFE05C2A), size: 18),
+                const Icon(
+                  Icons.warning_amber_rounded,
+                  color: Color(0xFFE05C2A),
+                  size: 18,
+                ),
             ],
           ),
           const SizedBox(height: 10),
@@ -308,7 +328,10 @@ class _TermsTile extends StatelessWidget {
               Text(
                 section.body!,
                 style: TextStyle(
-                    fontSize: 13, color: Colors.grey[600], height: 1.6),
+                  fontSize: 13,
+                  color: Colors.grey[600],
+                  height: 1.6,
+                ),
               ),
             if (section.bullets != null)
               ...section.bullets!.map(
@@ -331,9 +354,10 @@ class _TermsTile extends StatelessWidget {
                         child: Text(
                           b,
                           style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                              height: 1.5),
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                            height: 1.5,
+                          ),
                         ),
                       ),
                     ],
