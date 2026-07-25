@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
@@ -8,9 +7,11 @@ import 'package:finsight/screens/auth_provider.dart';
 
 void main() {
   setUpAll(() {
-    dotenv.testLoad(fileInput: '''
+    dotenv.testLoad(
+      fileInput: '''
       API_URL=https://placeholder
-    ''');
+    ''',
+    );
   });
 
   testWidgets('FinSight app loads main navigation', (
