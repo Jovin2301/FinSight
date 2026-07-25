@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       - name: Create .env for CI
-        run: echo "API_URL=https://placeholder" > .env
+        run: echo "BASE_URL=https://placeholder" > .env
       - name: Check formatting
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze code
