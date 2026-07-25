@@ -24,7 +24,10 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await tester.pump();
+
+    await tester.pump(const Duration(seconds: 3));
+    
 
     expect(find.text('Dashboard'), findsWidgets);
     expect(find.text('Transactions'), findsWidgets);
