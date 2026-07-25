@@ -5,11 +5,9 @@ import 'package:finsight/main.dart';
 void main() {
   setUpAll(() async {
     // Load dotenv with test values so widgets reading dotenv.env[...] don't throw
-    dotenv.testLoad(
-      fileInput: '''
+    dotenv.testLoad(fileInput: '''
 API_URL=https://placeholder
-''',
-    );
+''');
   });
 
   testWidgets('FinSight app loads main navigation', (
