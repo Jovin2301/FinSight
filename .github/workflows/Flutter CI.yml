@@ -10,6 +10,9 @@ jobs:
   test:
     name: Analyze & Test
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: finsight
     steps:
       - uses: actions/checkout@v4
 
@@ -34,13 +37,16 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          file: coverage/lcov.info
+          file: finsight/coverage/lcov.info
           fail_ci_if_error: false
 
   build:
     name: Build APK
     needs: test # only runs if the test job passes
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: finsight
     steps:
       - uses: actions/checkout@v4
 
@@ -60,13 +66,16 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: finsight/build/app/outputs/flutter-apk/app-release.apk
           retention-days: 14
 
   build_ios_simulator:
     name: Build iOS (Simulator)
     needs: test
     runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: finsight
     steps:
       - uses: actions/checkout@v4
 
@@ -81,7 +90,3 @@ jobs:
 
       - name: Build for iOS Simulator (no signing needed)
         run: flutter build ios --simulator --no-codesign
-#        uses: reactivecircus/android-emulator-runner@v2
-#        with:
-#          api-level: 33
-#          script: flutter test integration_test
