@@ -1,13 +1,3 @@
-"""
-Loads the trained, calibrated model once and exposes get_overspend_warning(),
-the function your app's API/cron job should call for each active budget.
-
-Usage:
-    from serving.predict import get_overspend_warning
-
-    warning = get_overspend_warning(budget_row, transactions_so_far, today)
-"""
-
 from functools import lru_cache
 from pathlib import Path
 

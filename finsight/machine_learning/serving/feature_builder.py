@@ -1,12 +1,3 @@
-"""
-Builds the exact feature row the model expects, for a budget that is
-currently in progress (i.e. "as of today", not a historical snapshot).
-
-This mirrors the feature engineering in models/train_model.ipynb.
-If you ever change a feature there, mirror the change here too — the two
-must stay in lockstep or predictions will silently be wrong.
-"""
-
 from pathlib import Path
 
 import joblib

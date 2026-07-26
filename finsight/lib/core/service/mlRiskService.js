@@ -1,5 +1,5 @@
-const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
-const REQUEST_TIMEOUT_MS = Number(process.env.ML_SERVICE_TIMEOUT_MS) || 8000;
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL; // deployed alr
+const REQUEST_TIMEOUT_MS = Number(process.env.ML_SERVICE_TIMEOUT_MS)
 
 function toISODate(value) {
     if (!value) return null;

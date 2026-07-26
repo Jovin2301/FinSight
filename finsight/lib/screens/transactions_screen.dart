@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'dart:math' as math;
-
+import 'package:share_plus/share_plus.dart';
+import 'dart:typed_data';
+import '../utils/download_web.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:csv/csv.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +16,7 @@ import '../widgets/notification_bell.dart';
 import 'add_expense_screen.dart';
 import 'bill_scan_dialog.dart';
 import 'receipt_scan_dialog.dart';
+import 'dart:convert';
 
 class TransactionsScreen extends StatefulWidget {
   final List<Expense> expenses;
@@ -528,6 +532,18 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = 'transactions_$timestamp.csv';
 
+      // Web: dart:io's Platform class doesn't exist in the browser, so it
+      // must be checked (and skipped) before anything else touches it.
+      if (kIsWeb) {
+        downloadCsvWeb(csvData, fileName);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Downloaded: $fileName')),
+          );
+        }
+        return;
+      }
+
       // Desktop platforms (macOS/Windows/Linux) have a real Downloads
       // folder the app can write to directly.
       if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
@@ -547,6 +563,14 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
           return;
         }
       }
+
+      // Mobile (iOS/Android): write to a temp file and hand off to the
+      // native share sheet so the user can save/send it themselves.
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/$fileName');
+      await file.writeAsString(csvData);
+
+      await Share.shareXFiles([XFile(file.path)], text: 'Transactions export');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
