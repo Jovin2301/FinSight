@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 
 import 'package:finsight/screens/auth_provider.dart';
+import 'package:finsight/screens/login_screen.dart';
 import 'package:finsight/screens/main_screen.dart';
 
 void main() {
@@ -13,6 +14,14 @@ void main() {
         BASE_URL=https://placeholder
       ''',
     );
+  });
+
+  testWidgets('FinSight app loads login screen', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: LoginScreen()));
+
+    expect(find.text('Welcome Back'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Password'), findsOneWidget);
   });
 
   testWidgets('MainScreen shows all bottom navigation tabs', (

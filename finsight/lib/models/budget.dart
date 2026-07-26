@@ -57,4 +57,25 @@ class Budget {
       'endDate': endDate?.toIso8601String().split('T')[0],
     };
   }
+
+  double get remainingAmount => limit - spent;
+
+  double get progress {
+    if (limit <= 0) return 0;
+    return (spent / limit).clamp(0.0, 1.0);
+  }
+
+  bool isActiveOn(DateTime date) {
+    final checkDate = DateTime(date.year, date.month, date.day);
+    final start = startDate == null
+        ? null
+        : DateTime(startDate!.year, startDate!.month, startDate!.day);
+    final end = endDate == null
+        ? null
+        : DateTime(endDate!.year, endDate!.month, endDate!.day);
+
+    if (start != null && checkDate.isBefore(start)) return false;
+    if (end != null && checkDate.isAfter(end)) return false;
+    return true;
+  }
 }

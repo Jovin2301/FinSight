@@ -5,7 +5,6 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
   static const Color _tealDark = Color(0xFF2D7D7B);
   static const Color _bgColor = Color(0xFFEBF0F0);
-  static const Color _cardColor = Color(0xFFFFFFFF);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +22,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
               child: Container(
                 margin: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -55,7 +54,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(
@@ -81,7 +80,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
                         Text(
                           'Last updated June 2026 · FinSight Orbital 2026',
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
+                            color: Colors.white.withValues(alpha: 0.7),
                             fontSize: 12,
                           ),
                         ),
@@ -240,7 +239,7 @@ class _PolicySection extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -424,7 +423,7 @@ class _ContactBand extends StatelessWidget {
             subtitle,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               fontSize: 13,
             ),
           ),

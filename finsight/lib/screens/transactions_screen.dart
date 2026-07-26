@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:share_plus/share_plus.dart';
-import 'dart:typed_data';
-import '../utils/download_web.dart';
+import '../utils/download.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:csv/csv.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -16,7 +15,6 @@ import '../widgets/notification_bell.dart';
 import 'add_expense_screen.dart';
 import 'bill_scan_dialog.dart';
 import 'receipt_scan_dialog.dart';
-import 'dart:convert';
 
 class TransactionsScreen extends StatefulWidget {
   final List<Expense> expenses;
@@ -537,9 +535,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       if (kIsWeb) {
         downloadCsvWeb(csvData, fileName);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Downloaded: $fileName')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Downloaded: $fileName')));
         }
         return;
       }

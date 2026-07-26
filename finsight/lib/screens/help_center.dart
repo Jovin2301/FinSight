@@ -15,7 +15,6 @@ class HelpCenterScreen extends StatefulWidget {
 
 class _HelpCenterScreenState extends State<HelpCenterScreen> {
   static const Color _tealDark = Color(0xFF2D7D7B);
-  static const Color _tealLight = Color(0xFF4AADAA);
   static const Color _bgColor = Color(0xFFEBF0F0);
   static const Color _cardColor = Color(0xFFFFFFFF);
 
@@ -162,7 +161,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -289,7 +288,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
                 Text(
                   'Our team is happy to assist you.',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withValues(alpha: 0.8),
                     fontSize: 13,
                   ),
                 ),
@@ -347,7 +346,7 @@ class _TopicCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -434,7 +433,7 @@ class _FAQTileState extends State<_FAQTile>
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),

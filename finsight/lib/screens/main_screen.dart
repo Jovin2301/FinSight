@@ -30,7 +30,7 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   bool _loadingBudgets = false;
   List<String> _budgetCategories = [];
-  List<Goal> _goals = [];
+  final List<Goal> _goals = [];
   final List<Budget> _budgets = _previewBudgetPage
       ? [
           const Budget(
@@ -591,12 +591,8 @@ class _MainScreenState extends State<MainScreen> {
             ..clear()
             ..addAll(data.map((item) => Goal.fromJson(item)));
         });
-      } else {
-        // add this temporarily
-        _showMessage('response ${response.statusCode}');
       }
     } catch (e) {
-      print('Goal load error: ${e.toString()}'); // add this temporarily
       _showMessage('Could not load goals');
     }
   }

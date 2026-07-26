@@ -171,7 +171,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
               itemCount: _sections.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, _) => const SizedBox(height: 10),
               itemBuilder: (context, i) => _TermsTile(section: _sections[i]),
             ),
           ),
@@ -250,7 +250,7 @@ class _TermsTile extends StatelessWidget {
             : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

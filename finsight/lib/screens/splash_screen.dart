@@ -19,10 +19,10 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _opacityAnimation;
 
   Future<void> _checkLogin() async {
+    final auth = context.read<AuthProvider>();
+
     // Show splash screen for 3 seconds
     await Future.delayed(const Duration(seconds: 3));
-
-    final auth = context.read<AuthProvider>();
 
     await auth.tryAutoLogin();
 
@@ -79,7 +79,7 @@ class _SplashScreenState extends State<SplashScreen>
               height: 260,
               width: 260,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(.08),
+                color: Colors.white.withValues(alpha: .08),
                 shape: BoxShape.circle,
               ),
             ),
@@ -92,7 +92,7 @@ class _SplashScreenState extends State<SplashScreen>
               height: 300,
               width: 300,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(.06),
+                color: Colors.white.withValues(alpha: .06),
                 shape: BoxShape.circle,
               ),
             ),
@@ -115,7 +115,7 @@ class _SplashScreenState extends State<SplashScreen>
                         boxShadow: [
                           BoxShadow(
                             blurRadius: 25,
-                            color: Colors.black.withOpacity(.15),
+                            color: Colors.black.withValues(alpha: .15),
                             offset: const Offset(0, 10),
                           ),
                         ],
@@ -144,7 +144,7 @@ class _SplashScreenState extends State<SplashScreen>
                     Text(
                       "Track • Analyze • Grow",
                       style: TextStyle(
-                        color: Colors.white.withOpacity(.9),
+                        color: Colors.white.withValues(alpha: .9),
                         fontSize: 18,
                       ),
                     ),
@@ -173,7 +173,7 @@ class _SplashScreenState extends State<SplashScreen>
               "Powered by FinSight",
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white.withOpacity(.7),
+                color: Colors.white.withValues(alpha: .7),
                 fontSize: 13,
               ),
             ),

@@ -25,6 +25,10 @@ app.use('/receipt', receiptRoutes);
 const recurringRoutes = require('./lib/core/routes/recurringRoutes');
 app.use('/recurring', recurringRoutes);
 
-app.listen(PORT, () => {
-    console.log('Server running on port 3000');
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+module.exports = app;

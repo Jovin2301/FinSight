@@ -25,8 +25,6 @@ router.get('/', authMiddleware, async (req, res) => {
 
 // create budget
 router.post('/', authMiddleware, async (req, res) => {
-    console.log('budget body', req.body);
-
     try {
         await budgetService.createBudget(req.userId, req.body);
         const budgets = await budgetService.getBudgets(req.userId);

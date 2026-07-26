@@ -240,6 +240,7 @@ class _GoalScreenState extends State<GoalScreen> {
     );
 
     if (shouldDelete != true) return;
+    if (!context.mounted) return;
 
     try {
       final auth = context.read<AuthProvider>();

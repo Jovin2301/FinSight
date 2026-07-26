@@ -1,3 +1,5 @@
+// ignore_for_file: use_null_aware_elements
+
 import 'package:finsight/screens/help_center.dart';
 import 'package:finsight/screens/login_screen.dart';
 import 'package:currency_picker/currency_picker.dart';
@@ -36,13 +38,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedTheme = 'Light';
   DateTime? _selectedBudgetCycleDate;
   bool _prefsLoaded = false;
-
-  Future<void> _openLoginScreen() async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
-  }
 
   @override
   void didChangeDependencies() {
@@ -91,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     } catch (e) {
-      print('Error loading preferences: $e');
+      return;
     }
   }
 
@@ -128,10 +123,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (response.statusCode != 201) throw Exception('Failed to save');
 
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Preferences saved')));
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -146,6 +143,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       lastDate: DateTime(2100),
     );
 
+    if (!mounted) return;
     if (picked != null) {
       setState(() => _selectedBudgetCycleDate = picked);
       _savePreferences(budgetCycleDate: picked);
@@ -364,6 +362,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: OutlinedButton.icon(
               onPressed: () async {
                 await context.read<AuthProvider>().logout();
+                if (!context.mounted) return;
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => const LoginScreen()),

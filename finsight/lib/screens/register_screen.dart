@@ -3,8 +3,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import './login_screen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
-import 'auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -65,19 +63,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (response.statusCode == 201) {
+        if (!mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const LoginScreen()),
           (route) => false,
         );
       } else {
-        print('Status: ${response.statusCode}');
-        print('Body: ${response.body}');
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Could not create account')),
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not connect to server')),
       );

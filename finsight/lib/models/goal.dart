@@ -64,6 +64,11 @@ class Goal {
     'goalIconEmoji': iconEmoji,
   };
 
+  double get progress {
+    if (targetAmount <= 0) return 0;
+    return (savedAmount / targetAmount).clamp(0.0, 1.0);
+  }
+
   /// Postgres NUMERIC/DECIMAL columns come back through node-postgres as
   /// Strings (to avoid floating point precision loss), not as num — so this
   /// has to tolerate both instead of doing a hard `as num` cast.

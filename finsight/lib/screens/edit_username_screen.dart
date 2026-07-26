@@ -91,8 +91,8 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
           'username': updatedUser?['userName'],
           'email': updatedUser?['userEmail'],
         });
-        print('Updated user keys: ${updatedUser.keys}');
 
+        if (!mounted) return;
         setState(() {
           _changesMade = false;
         });
@@ -104,6 +104,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
         throw Exception('Failed to update profile');
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -131,7 +132,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
+                  color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -206,7 +207,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: _tealDark.withOpacity(0.3),
+                          color: _tealDark.withValues(alpha: 0.3),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),
@@ -267,8 +268,9 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                   hint: 'Enter your email',
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) {
-                    if (v == null || v.trim().isEmpty)
+                    if (v == null || v.trim().isEmpty) {
                       return 'Email is required';
+                    }
                     if (!v.contains('@')) return 'Enter a valid email';
                     return null;
                   },
@@ -300,7 +302,7 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
                     boxShadow: _changesMade
                         ? [
                             BoxShadow(
-                              color: _tealDark.withOpacity(0.35),
+                              color: _tealDark.withValues(alpha: 0.35),
                               blurRadius: 16,
                               offset: const Offset(0, 6),
                             ),
@@ -388,7 +390,7 @@ class _SectionCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withValues(alpha: 0.04),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -484,17 +486,11 @@ class _FieldItem extends StatelessWidget {
 class _ActionRow extends StatelessWidget {
   final IconData icon;
   final String label;
-  final Color? textColor;
-  final Color? iconColor;
-  final Widget? trailing;
   final VoidCallback onTap;
 
   const _ActionRow({
     required this.icon,
     required this.label,
-    this.textColor,
-    this.iconColor,
-    this.trailing,
     required this.onTap,
   });
 
@@ -511,14 +507,10 @@ class _ActionRow extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: (iconColor ?? const Color(0xFF2D7D7B)).withOpacity(0.1),
+                color: const Color(0xFF2D7D7B).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                icon,
-                color: iconColor ?? const Color(0xFF2D7D7B),
-                size: 18,
-              ),
+              child: Icon(icon, color: const Color(0xFF2D7D7B), size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -527,16 +519,15 @@ class _ActionRow extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: textColor ?? const Color(0xFF1A2D3D),
+                  color: const Color(0xFF1A2D3D),
                 ),
               ),
             ),
-            trailing ??
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: Colors.grey[300],
-                  size: 22,
-                ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Colors.grey[300],
+              size: 22,
+            ),
           ],
         ),
       ),

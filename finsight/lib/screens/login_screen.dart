@@ -38,6 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     try {
+      final authProvider = context.read<AuthProvider>();
       final response = await http.post(
         Uri.parse('${dotenv.env['BASE_URL']}/user/login'),
         headers: {'Content-Type': 'application/json'},
@@ -49,25 +50,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // put the user data into the box
         try {
-          await context.read<AuthProvider>().setSession(
-            data['token'],
-            data['user'],
-          );
+          await authProvider.setSession(data['token'], data['user']);
+          if (!mounted) return;
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => const MainScreen()),
             (route) => false,
           );
         } catch (e, stack) {
-          print('SETSESSION CRASHED: $e');
-          print(stack);
+          debugPrint('SETSESSION CRASHED: $e');
+          debugPrint('$stack');
         }
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Incorrect email or password')),
         );
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Could not connect to server')),
       );
@@ -105,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.15),
+                      color: Colors.white.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -127,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Sign in to continue',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 15,
                     ),
                   ),
