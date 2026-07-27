@@ -8,7 +8,6 @@ class IconDropdownMenu extends StatefulWidget {
 }
 
 class _IconDropdownMenuState extends State<IconDropdownMenu> {
-  // Track the selected value
   String? selectedValue;
 
   @override

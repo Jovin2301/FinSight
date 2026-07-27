@@ -4,7 +4,6 @@ const Color tealDark = Color(0xFF2D7D7B);
 const Color tealLight = Color(0xFFE6F4F3);
 const Color helpBgColor = Color(0xFFEBF0F0);
 
-/// Generic app bar shared across all topic screens
 class TopicAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   const TopicAppBar({super.key, required this.title});
@@ -45,7 +44,6 @@ class TopicAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// Teal icon badge used in header cards
 class IconBadge extends StatelessWidget {
   final IconData icon;
   final Color bgColor;
@@ -72,7 +70,6 @@ class IconBadge extends StatelessWidget {
   }
 }
 
-/// White card container used throughout
 class HelpCard extends StatelessWidget {
   final Widget child;
   final EdgeInsets? padding;
@@ -108,7 +105,6 @@ class HelpCard extends StatelessWidget {
   }
 }
 
-/// Expandable FAQ row
 class FaqItem extends StatefulWidget {
   final String question;
   final String answer;
@@ -164,7 +160,6 @@ class _FaqItemState extends State<FaqItem> {
   }
 }
 
-/// Numbered step tile
 class StepTile extends StatelessWidget {
   final int step;
   final String title;
@@ -232,7 +227,6 @@ class StepTile extends StatelessWidget {
   }
 }
 
-/// Teal bullet point row
 class BulletTile extends StatelessWidget {
   final String text;
   const BulletTile({super.key, required this.text});
@@ -267,7 +261,6 @@ class BulletTile extends StatelessWidget {
   }
 }
 
-/// Orange warning banner
 class WarningBanner extends StatelessWidget {
   final String text;
   const WarningBanner({super.key, required this.text});
@@ -305,7 +298,6 @@ class WarningBanner extends StatelessWidget {
   }
 }
 
-/// Teal info banner
 class InfoBanner extends StatelessWidget {
   final String text;
   const InfoBanner({super.key, required this.text});
@@ -338,7 +330,6 @@ class InfoBanner extends StatelessWidget {
   }
 }
 
-/// Section header label
 class SectionLabel extends StatelessWidget {
   final String text;
   const SectionLabel({super.key, required this.text});
