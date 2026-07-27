@@ -22,7 +22,8 @@ class TransactionsScreen extends StatefulWidget {
   final Map<String, String> categoryIcons;
   final ValueChanged<Expense> onAddExpense;
   final ValueChanged<RecurringPayment> onAddRecurringPayment;
-  final void Function(int index, RecurringPayment payment) onUpdateRecurringPayment;
+  final void Function(int index, RecurringPayment payment)
+  onUpdateRecurringPayment;
   final ValueChanged<int> onDeleteRecurringPayment;
   final void Function(int index, Expense expense) onUpdateExpense;
   final ValueChanged<int> onDeleteExpense;

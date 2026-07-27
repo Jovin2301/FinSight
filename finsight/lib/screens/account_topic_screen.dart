@@ -83,8 +83,7 @@ class AccountLoginScreen extends StatelessWidget {
           const SizedBox(height: 10),
           const FaqItem(
             question: 'Can I log in with Google or Apple?',
-            answer:
-                'No! This feature is not developed yet. ',
+            answer: 'No! This feature is not developed yet. ',
           ),
           const SizedBox(height: 10),
           const FaqItem(
