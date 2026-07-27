@@ -407,9 +407,7 @@ class HomeContent extends StatelessWidget {
       ),
     );
   }
-
-  // ── Helper Widgets ──
-
+  
   Widget _goalsCard() {
     if (goals.isEmpty) return _emptyCard('No goals added yet.');
 

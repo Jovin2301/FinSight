@@ -113,7 +113,6 @@ class TermsOfServiceScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // ── Notice banner ───────────────────────────────────
           Container(
             margin: const EdgeInsets.fromLTRB(20, 4, 20, 0),
             padding: const EdgeInsets.all(14),
@@ -166,7 +165,6 @@ class TermsOfServiceScreen extends StatelessWidget {
             ),
           ),
 
-          // ── Scrollable sections ─────────────────────────────
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
@@ -176,7 +174,6 @@ class TermsOfServiceScreen extends StatelessWidget {
             ),
           ),
 
-          // ── Pinned accept footer ────────────────────────────
           Container(
             decoration: const BoxDecoration(
               color: Colors.white,
@@ -234,7 +231,6 @@ class TermsOfServiceScreen extends StatelessWidget {
   }
 }
 
-// ── Terms tile ────────────────────────────────────────────────
 class _TermsTile extends StatelessWidget {
   final _TermsSection section;
   const _TermsTile({required this.section});
@@ -371,7 +367,6 @@ class _TermsTile extends StatelessWidget {
   }
 }
 
-// ── Data class ────────────────────────────────────────────────
 class _TermsSection {
   final String number;
   final String title;

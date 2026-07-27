@@ -84,13 +84,7 @@ class AccountLoginScreen extends StatelessWidget {
           const FaqItem(
             question: 'Can I log in with Google or Apple?',
             answer:
-                'Yes! On the login screen tap "Continue with Google" or "Continue with Apple." Your account will be linked automatically on first use.',
-          ),
-          const SizedBox(height: 10),
-          const FaqItem(
-            question: 'What if I didn\'t receive the OTP?',
-            answer:
-                'Check your spam/junk folder first. If it\'s still missing, wait 60 seconds and tap "Resend Code." Make sure the email you entered is correct.',
+                'No! This feature is not developed yet. ',
           ),
           const SizedBox(height: 10),
           const FaqItem(

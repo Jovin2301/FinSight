@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -14,7 +13,6 @@ class ChangePasswordScreen extends StatefulWidget {
   State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
-// ── Live requirement checklist row ─────────────────────────────
 class _RequirementRow extends StatelessWidget {
   final String label;
   final bool met;
@@ -140,7 +138,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             message = data['error'].toString();
           }
         } catch (_) {
-          // response body wasn't JSON; fall back to the default message
+          // response body wasn't JSON, fall back to the default message
         }
         ScaffoldMessenger.of(
           context,

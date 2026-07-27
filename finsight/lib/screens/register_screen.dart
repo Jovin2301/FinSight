@@ -193,7 +193,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Repeat password field
               _buildField(
                 label: 'Repeat password',
                 controller: _confirmPasswordController,
@@ -251,7 +250,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Login button (light mint)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

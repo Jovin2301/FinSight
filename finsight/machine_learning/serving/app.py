@@ -1,19 +1,3 @@
-"""
-HTTP wrapper around get_overspend_warning() so the Node.js backend (which
-can't load a scikit-learn .pkl directly) can reach the model over the network.
-
-Run locally:
-    uvicorn serving.app:app --reload --port 8000
-
-Run in prod (from the machine_learning/ project root):
-    uvicorn serving.app:app --host 0.0.0.0 --port 8000 --workers 2
-
-Endpoints:
-    GET  /health
-    POST /predict/overspend-risk        (single budget)
-    POST /predict/overspend-risk/batch  (many budgets in one round trip)
-"""
-
 from datetime import date
 from typing import Optional
 

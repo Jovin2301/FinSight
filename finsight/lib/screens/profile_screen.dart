@@ -1,5 +1,3 @@
-// ignore_for_file: use_null_aware_elements
-
 import 'package:finsight/screens/help_center.dart';
 import 'package:finsight/screens/login_screen.dart';
 import 'package:currency_picker/currency_picker.dart';
@@ -230,7 +228,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 24),
 
-          // Budget Preferences
           _sectionTitle('Budget Preferences'),
           const SizedBox(height: 12),
           _settingsTile(
@@ -289,7 +286,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 24),
 
-          // ── App Settings ──
           _sectionTitle('App Settings'),
           const SizedBox(height: 12),
           _settingsTile(
@@ -308,25 +304,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
           ),
-          _settingsTile(
-            'Appearance',
-            icon: Icons.palette_outlined,
-            value: _selectedTheme,
-            onTap: () {
-              _showPicker(
-                title: 'Select App Appearance',
-                options: ['Light Mode', 'Dark Mode'],
-                selected: _selectedTheme,
-                onSelect: (val) {
-                  setState(() => _selectedTheme = val);
-                  _savePreferences(theme: val);
-                },
-              );
-            },
-          ),
-          const SizedBox(height: 24),
 
-          // ── Support ──
           _sectionTitle('Support'),
           const SizedBox(height: 12),
           _settingsTile(
@@ -355,7 +333,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 32),
 
-          // ── Sign Out Button ──
           SizedBox(
             width: double.infinity,
             height: 52,

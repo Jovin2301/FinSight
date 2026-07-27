@@ -75,28 +75,3 @@ def get_overspend_warning(
         "shouldNotify": risk_score >= RISK_HIGH and projected_overage > 0,
     }
 
-
-if __name__ == "__main__":
-    # Quick manual smoke test — adjust dates/amounts to something in your data
-    # before relying on this; it's not a substitute for testing against
-    # real historical budgets with known outcomes.
-    sample_budget = {
-        "budgetLimit": 200.0,
-        "budgetStartDate": pd.Timestamp("2026-07-01"),
-        "budgetEndDate": pd.Timestamp("2026-07-30"),
-        "budgetFreq": "monthly",
-        "budgetName": "Food",
-    }
-    sample_transactions = pd.DataFrame({
-        "transDate": pd.to_datetime([
-            "2026-07-02", "2026-07-04", "2026-07-07", "2026-07-10", "2026-07-12",
-        ]),
-        "transAmt": [25.0, 18.5, 40.0, 22.0, 30.0],
-    })
-
-    result = get_overspend_warning(
-        sample_budget,
-        sample_transactions,
-        today=pd.Timestamp.now(),
-    )
-    print(result)

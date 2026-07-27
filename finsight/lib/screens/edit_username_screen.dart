@@ -38,8 +38,6 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
 
     final user = context.read<AuthProvider>().user;
 
-    // Remove the isEmpty guard — always sync with latest user data
-    // But temporarily remove the listener to avoid triggering _onChanged
     _usernameController.removeListener(_onChanged);
     _emailController.removeListener(_onChanged);
 
@@ -191,7 +189,6 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
           children: [
             const SizedBox(height: 4),
 
-            // ── Avatar section ──────────────────────────────
             Center(
               child: Stack(
                 children: [
@@ -247,7 +244,6 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
 
             const SizedBox(height: 28),
 
-            // ── Personal Info card ──────────────────────────
             _SectionCard(
               label: 'Personal Information',
               children: [
@@ -280,7 +276,6 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
 
             const SizedBox(height: 14),
 
-            // ── Save button ─────────────────────────────────
             AnimatedOpacity(
               opacity: _changesMade ? 1.0 : 0.5,
               duration: const Duration(milliseconds: 200),
@@ -361,7 +356,6 @@ class _EditUserDetailsScreenState extends State<EditUserDetailsScreen> {
   }
 }
 
-// ── Section card wrapper ──────────────────────────────────────
 class _SectionCard extends StatelessWidget {
   final String label;
   final List<Widget> children;
@@ -482,7 +476,6 @@ class _FieldItem extends StatelessWidget {
   }
 }
 
-// ── Tappable action row ───────────────────────────────────────
 class _ActionRow extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -535,7 +528,6 @@ class _ActionRow extends StatelessWidget {
   }
 }
 
-// ── Hairline divider ──────────────────────────────────────────
 class _Divider extends StatelessWidget {
   const _Divider();
   @override

@@ -22,8 +22,7 @@ class TransactionsScreen extends StatefulWidget {
   final Map<String, String> categoryIcons;
   final ValueChanged<Expense> onAddExpense;
   final ValueChanged<RecurringPayment> onAddRecurringPayment;
-  final void Function(int index, RecurringPayment payment)
-  onUpdateRecurringPayment;
+  final void Function(int index, RecurringPayment payment) onUpdateRecurringPayment;
   final ValueChanged<int> onDeleteRecurringPayment;
   final void Function(int index, Expense expense) onUpdateExpense;
   final ValueChanged<int> onDeleteExpense;
@@ -530,8 +529,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = 'transactions_$timestamp.csv';
 
-      // Web: dart:io's Platform class doesn't exist in the browser, so it
-      // must be checked (and skipped) before anything else touches it.
       if (kIsWeb) {
         downloadCsvWeb(csvData, fileName);
         if (mounted) {
@@ -542,8 +539,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         return;
       }
 
-      // Desktop platforms (macOS/Windows/Linux) have a real Downloads
-      // folder the app can write to directly.
       if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
         final downloadsDir = await getDownloadsDirectory();
         if (downloadsDir != null) {
@@ -562,8 +557,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         }
       }
 
-      // Mobile (iOS/Android): write to a temp file and hand off to the
-      // native share sheet so the user can save/send it themselves.
       final tempDir = await getTemporaryDirectory();
       final file = File('${tempDir.path}/$fileName');
       await file.writeAsString(csvData);

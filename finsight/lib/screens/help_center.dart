@@ -154,7 +154,6 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
         children: [
           const SizedBox(height: 8),
 
-          // Search bar
           Container(
             decoration: BoxDecoration(
               color: _cardColor,
@@ -217,7 +216,6 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
             const SizedBox(height: 28),
           ],
 
-          // FAQ section
           Row(
             children: [
               Text(
@@ -328,7 +326,6 @@ class _HelpCenterScreenState extends State<HelpCenterScreen> {
   }
 }
 
-// ── Topic card
 class _TopicCard extends StatelessWidget {
   final _TopicItem topic;
   const _TopicCard({required this.topic});
@@ -383,7 +380,6 @@ class _TopicCard extends StatelessWidget {
   }
 }
 
-// ── FAQ tile
 class _FAQTile extends StatefulWidget {
   final _FAQItem item;
   const _FAQTile({required this.item});
@@ -492,7 +488,6 @@ class _FAQTileState extends State<_FAQTile>
   }
 }
 
-// ── Data classes
 class _FAQItem {
   final String question;
   final String answer;
